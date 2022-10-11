@@ -17,7 +17,7 @@ const Layout = ({ children, title }: Props) => {
     <>
       <Head>
         <title>{title ?? "Travl page"}</title>
-        <meta name="description" content="WCard" />
+        <meta name="description" content="Travl" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="flex flex-nowrap">
