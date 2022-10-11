@@ -4,18 +4,31 @@ import { loggerLink } from "@trpc/client/links/loggerLink";
 import { withTRPC } from "@trpc/next";
 import { SessionProvider } from "next-auth/react";
 import superjson from "superjson";
-import type { AppType } from "next/app";
+import type { AppProps, AppType } from "next/app";
 import type { AppRouter } from "../server/router";
-import type { Session } from "next-auth";
 import "../styles/globals.css";
+import { NextPage } from "next";
+import { ReactElement, ReactNode } from "react";
+import { ReactQueryDevtools } from "react-query/devtools";
 
-const MyApp: AppType<{ session: Session | null }> = ({
+export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
+  getLayout?: (page: ReactElement) => ReactNode;
+};
+
+type AppPropsWithLayout = AppProps & {
+  Component: NextPageWithLayout;
+  pageProps: any;
+};
+
+const MyApp = ({
   Component,
   pageProps: { session, ...pageProps },
-}) => {
+}: AppPropsWithLayout) => {
+  const getLayout = Component.getLayout ?? (page => page);
   return (
     <SessionProvider session={session}>
-      <Component {...pageProps} />
+      {getLayout(<Component {...pageProps} />)}
+      <ReactQueryDevtools initialIsOpen={false} position={"bottom-right"} />
     </SessionProvider>
   );
 };
@@ -37,7 +50,7 @@ export default withTRPC<AppRouter>({
     return {
       links: [
         loggerLink({
-          enabled: (opts) =>
+          enabled: opts =>
             process.env.NODE_ENV === "development" ||
             (opts.direction === "down" && opts.result instanceof Error),
         }),
@@ -68,4 +81,4 @@ export default withTRPC<AppRouter>({
    * @link https://trpc.io/docs/ssr
    */
   ssr: false,
-})(MyApp);
+})(MyApp as AppType);

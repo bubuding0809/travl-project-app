@@ -1,64 +1,221 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-    provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity"]
 }
 
 datasource db {
-    provider = "sqlite"
-    // NOTE: When using postgresql, mysql or sqlserver, uncomment the @db.text annotations in model Account below
-    // Further reading: 
-    // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
-    // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
-    url      = env("DATABASE_URL")
+  provider             = "mysql"
+  url                  = env("DATABASE_URL")
+  referentialIntegrity = "prisma"
 }
 
-model Example {
-    id String @id @default(cuid())
-}
-
-// Necessary for Next auth
 model Account {
-    id                String  @id @default(cuid())
-    userId            String
-    type              String
-    provider          String
-    providerAccountId String
-    refresh_token     String? //@db.Text
-    access_token      String? //@db.Text
-    expires_at        Int?
-    token_type        String?
-    scope             String?
-    id_token          String? //@db.Text
-    session_state     String?
-    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@unique([provider, providerAccountId])
+  @@unique([provider, providerAccountId])
+  @@index([userId], map: "Account_userId_fkey")
 }
 
 model Session {
-    id           String   @id @default(cuid())
-    sessionToken String   @unique
-    userId       String
-    expires      DateTime
-    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "Session_userId_fkey")
 }
 
 model User {
-    id            String    @id @default(cuid())
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
-    accounts      Account[]
-    sessions      Session[]
+  id            String       @id @default(cuid())
+  name          String?
+  email         String?      @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  Post          Post[]
+  sessions      Session[]
+  Ticket_buy    Ticket_buy[]
 }
 
-model VerificationToken {
-    identifier String
-    token      String   @unique
-    expires    DateTime
+model Airport {
+  icao                                 String   @id @db.VarChar(4)
+  iata                                 String?  @db.VarChar(3)
+  airportName                          String   @db.VarChar(100)
+  latitude                             Float?   @db.Float
+  longitude                            Float?   @db.Float
+  timezone                             Float?   @db.Float
+  cid                                  String   @db.VarChar(20)
+  City                                 City     @relation(fields: [cid], references: [cid], onDelete: NoAction, onUpdate: NoAction, map: "airport_ibfk_1")
+  Flight_AirportToFlight_originAirport Flight[] @relation("AirportToFlight_originAirport")
+  Flight_AirportToFlight_destAirport   Flight[] @relation("AirportToFlight_destAirport")
 
-    @@unique([identifier, token])
+  @@index([cid], map: "cid")
+}
+
+model City {
+  cid        String     @id @db.VarChar(15)
+  cityName   String     @db.VarChar(50)
+  latitude   Float?     @db.Float
+  longitude  Float?     @db.Float
+  capital    String?    @db.VarChar(20)
+  alpha3     String     @db.VarChar(3)
+  population Int?
+  Country    Country    @relation(fields: [alpha3], references: [alpha3], onDelete: NoAction, onUpdate: NoAction, map: "city_ibfk_1")
+  Airport    Airport[]
+  Hospital   Hospital[]
+  Post       Post[]
+
+  @@index([alpha3], map: "city_ibfk_1_idx")
+}
+
+model Country {
+  alpha3      String        @id @db.VarChar(3)
+  alpha2      String        @unique(map: "alpha2") @db.VarChar(2)
+  countryName String        @db.VarChar(50)
+  ccode       Int           @unique(map: "ccode")
+  region      String?       @db.VarChar(20)
+  isoCode     String        @db.VarChar(3)
+  Currency    Currency      @relation(fields: [isoCode], references: [isoCode], onDelete: NoAction, onUpdate: NoAction, map: "country_ibfk_1")
+  City        City[]
+  Covid       Covid[]
+  Nationality Nationality[]
+
+  @@index([isoCode], map: "isoCode")
+}
+
+model Covid {
+  id           Int      @id @default(autoincrement())
+  entryDate    DateTime @db.Date
+  totalCaseNo  Int?
+  newCaseNo    Int?
+  totalDeathNo Int?
+  newDeathNo   Int?
+  alpha3       String   @db.VarChar(3)
+  Country      Country  @relation(fields: [alpha3], references: [alpha3], onDelete: NoAction, onUpdate: NoAction, map: "covid_ibfk_1")
+
+  @@index([alpha3], map: "covid_ibfk_1_idx")
+}
+
+model Currency {
+  isoCode                               String    @id @db.VarChar(3)
+  currencyName                          String?   @db.VarChar(50)
+  Country                               Country[]
+  Forex_CurrencyToForex_currencyBase    Forex[]   @relation("CurrencyToForex_currencyBase")
+  Forex_CurrencyToForex_currencyAgainst Forex[]   @relation("CurrencyToForex_currencyAgainst")
+}
+
+model Flies_with {
+  pid       String    @db.VarChar(40)
+  fid       Int
+  Passenger Passenger @relation(fields: [pid], references: [pid], onDelete: NoAction, onUpdate: NoAction, map: "Flies_with_ibfk_1")
+  Flight    Flight    @relation(fields: [fid], references: [fid], onDelete: NoAction, onUpdate: NoAction, map: "Flies_with_ibfk_2")
+
+  @@id([pid, fid])
+  @@index([fid], map: "fid")
+}
+
+model Flight {
+  fid                                   Int          @id @default(autoincrement())
+  departDateTime                        DateTime     @db.DateTime(0)
+  arriveDateTime                        DateTime     @db.DateTime(0)
+  originAirport                         String       @db.VarChar(4)
+  destAirport                           String       @db.VarChar(4)
+  priceUSD                              Float?       @db.Float
+  Airport_AirportToFlight_originAirport Airport      @relation("AirportToFlight_originAirport", fields: [originAirport], references: [icao], onDelete: NoAction, onUpdate: NoAction, map: "flight_ibfk_1")
+  Airport_AirportToFlight_destAirport   Airport      @relation("AirportToFlight_destAirport", fields: [destAirport], references: [icao], onDelete: NoAction, onUpdate: NoAction, map: "flight_ibfk_2")
+  Flies_with                            Flies_with[]
+  Ticket_buy                            Ticket_buy[]
+
+  @@index([destAirport], map: "destAirport")
+  @@index([originAirport], map: "originAirport")
+}
+
+model Forex {
+  tid                                      Int      @id @default(autoincrement())
+  entryDate                                DateTime @db.Date
+  rate                                     Float    @db.Float
+  currencyBase                             String   @db.VarChar(3)
+  currencyAgainst                          String   @db.VarChar(3)
+  Currency_CurrencyToForex_currencyBase    Currency @relation("CurrencyToForex_currencyBase", fields: [currencyBase], references: [isoCode], onDelete: NoAction, onUpdate: NoAction, map: "forex_ibfk_1")
+  Currency_CurrencyToForex_currencyAgainst Currency @relation("CurrencyToForex_currencyAgainst", fields: [currencyAgainst], references: [isoCode], onDelete: NoAction, onUpdate: NoAction, map: "forex_ibfk_2")
+
+  @@index([currencyAgainst], map: "currencyAgainst")
+  @@index([currencyBase], map: "currencyBase")
+}
+
+model Hospital {
+  hid          Int     @id @default(autoincrement())
+  hospitalName String? @db.VarChar(50)
+  address      String? @db.VarChar(100)
+  phoneNo      String? @db.VarChar(50)
+  latitude     Float?  @db.Float
+  longitude    Float?  @db.Float
+  cid          String  @db.VarChar(20)
+  City         City    @relation(fields: [cid], references: [cid], onDelete: NoAction, onUpdate: NoAction, map: "Hospital_ibfk_1")
+
+  @@index([cid], map: "cid")
+}
+
+model Nationality {
+  pid       String    @db.VarChar(40)
+  alpha3    String    @db.VarChar(3)
+  Passenger Passenger @relation(fields: [pid], references: [pid], onDelete: NoAction, onUpdate: NoAction, map: "Nationality_ibfk_1")
+  Country   Country   @relation(fields: [alpha3], references: [alpha3], onDelete: NoAction, onUpdate: NoAction, map: "Nationality_ibfk_2")
+
+  @@id([pid, alpha3])
+  @@index([alpha3], map: "alpha3")
+}
+
+model Passenger {
+  pid         String        @id @default(dbgenerated("(uuid())")) @db.VarChar(40)
+  firstName   String?       @db.VarChar(20)
+  lastName    String?       @db.VarChar(20)
+  passportNo  String        @unique(map: "passportNo") @db.VarChar(30)
+  age         Int?
+  Flies_with  Flies_with[]
+  Nationality Nationality[]
+  Ticket_buy  Ticket_buy[]
+}
+
+model Post {
+  postid    Int       @id @default(autoincrement())
+  createdAt DateTime? @default(now()) @db.DateTime(0)
+  updatedAt DateTime? @default(now()) @db.DateTime(0)
+  title     String
+  content   String    @db.VarChar(1000)
+  author    String
+  city      String?   @db.VarChar(15)
+  User      User      @relation(fields: [author], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "Post_ibfk_1")
+  City      City?     @relation(fields: [city], references: [cid], onDelete: NoAction, onUpdate: NoAction, map: "Post_ibfk_2")
+
+  @@index([author], map: "author")
+  @@index([city], map: "city")
+}
+
+model Ticket_buy {
+  createdAt DateTime? @default(now()) @db.DateTime(0)
+  updatedAt DateTime? @default(now()) @db.DateTime(0)
+  uid       String
+  fid       Int
+  pid       String    @db.VarChar(40)
+  User      User      @relation(fields: [uid], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Ticket_buy_ibfk_1")
+  Flight    Flight    @relation(fields: [fid], references: [fid], onDelete: NoAction, onUpdate: NoAction, map: "Ticket_buy_ibfk_2")
+  Passenger Passenger @relation(fields: [pid], references: [pid], onDelete: NoAction, onUpdate: NoAction, map: "Ticket_buy_ibfk_3")
+
+  @@id([uid, fid, pid])
+  @@index([fid], map: "fid")
+  @@index([pid], map: "pid")
 }
