@@ -11,7 +11,7 @@ import { NextPage } from "next";
 import { ReactElement, ReactNode } from "react";
 import { ReactQueryDevtools } from "react-query/devtools";
 
-export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
+export type NextPageWithLayout<P = any, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;
 };
 

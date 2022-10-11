@@ -127,11 +127,6 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
               >
                 Esc
               </button>
-              {query && filteredCities!.length === 0 && isFetching && (
-                <div className="absolute left-1.5">
-                  <Spinner />
-                </div>
-              )}
             </div>
 
             {/* Filtered search options */}
@@ -166,23 +161,23 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
                 </p>
               </div>
             )}
-            {/* {query && filteredCities!.length === 0 && isFetching && (
+            {query && filteredCities!.length === 0 && isFetching && (
               <div className="flex items-center">
                 <p className="p-2 px-4 text-start text-gray-500">
                   Loading results...
                 </p>
                 <Spinner />
               </div>
-            )} */}
+            )}
             {!query && (
               <div>
                 <p className="p-2 px-4 text-start text-gray-500">
                   Start by typing a city name
                   <span className="block">
                     e.g.
-                    <span className="font-bold"> "New York"</span>
+                    <span className="font-bold"> &quot;New York&quot;</span>
                     or
-                    <span className="font-bold"> "London"</span>
+                    <span className="font-bold"> &quot;London&quot;</span>
                   </span>
                 </p>
               </div>

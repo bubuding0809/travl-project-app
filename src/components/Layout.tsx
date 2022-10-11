@@ -70,7 +70,7 @@ const Layout = ({ children, title }: Props) => {
                 <div className="flex gap-2">
                   <div className="avatar">
                     <div className="w-12 rounded-full ring-4 ring-offset-base-100">
-                      <img src={session.user?.image!} />
+                      <img src={session.user!.image!} />
                     </div>
                   </div>
                   <div className="ml-0.5">
