@@ -28,9 +28,17 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
     error,
     isFetching,
     isLoading,
-  } = trpc.useQuery(["city.getCityByCityName", { cityName: query }], {
+  } = trpc.useQuery(["city.getCityByFullTextSearch", { query }], {
     initialData: [],
   });
+  // const {
+  //   data: filteredCities,
+  //   error,
+  //   isFetching,
+  //   isLoading,
+  // } = trpc.useQuery(["city.getCityByCityName", { cityName: query }], {
+  //   initialData: [],
+  // });
 
   // Add key down listener to window
   useEffect(() => {
@@ -114,6 +122,7 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
                 }}
                 className="w-full border-none bg-transparent p-3 text-neutral placeholder-gray-400 focus:ring-0"
                 placeholder="Search..."
+                autoFocus
               />
               <button
                 className="rounded border bg-gray-100 p-1 px-1.5 font-bold shadow-md"
