@@ -1,6 +1,6 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["referentialIntegrity"]
+  previewFeatures = ["referentialIntegrity", "fullTextSearch", "fullTextIndex"]
 }
 
 datasource db {
@@ -79,6 +79,7 @@ model City {
   Post       Post[]
 
   @@index([alpha3], map: "city_ibfk_1_idx")
+  @@fulltext([cityName], map: "FULLTEXT")
 }
 
 model Country {
@@ -94,6 +95,7 @@ model Country {
   Nationality Nationality[]
 
   @@index([isoCode], map: "isoCode")
+  @@fulltext([countryName], map: "FULLTEXT")
 }
 
 model Covid {
