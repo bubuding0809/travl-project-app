@@ -1,5 +1,5 @@
 import { Dialog, Combobox, Transition } from "@headlessui/react";
-import { Dispatch, Fragment, SetStateAction, useEffect } from "react";
+import { Dispatch, Fragment, SetStateAction, useEffect, useRef } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { trpc } from "../utils/trpc";
 import Spinner from "./Spinner";
@@ -22,11 +22,11 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
   setDebouncedQuery,
   setResult,
 }) => {
+  const focusRef = useRef<HTMLInputElement>(null);
   const {
     data: filteredCities,
     error,
     isFetching,
-    isLoading,
   } = trpc.useQuery(["city.getCityByFullTextSearch", { query }], {
     initialData: [],
   });
@@ -61,6 +61,9 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
     <Transition.Root
       show={open}
       as={Fragment}
+      afterEnter={() => {
+        focusRef.current?.focus();
+      }}
       afterLeave={() => {
         setDebouncedQuery("");
         setQuery("");
@@ -106,6 +109,7 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
               <div className="flex items-center px-3">
                 <MagnifyingGlassIcon className="h-6 w-6 flex-grow text-gray-500" />
                 <Combobox.Input
+                  ref={focusRef}
                   onChange={event => {
                     const query = event.target.value.trim();
                     setDebouncedQuery(query);
@@ -184,6 +188,13 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
                         or
                         <span className="font-bold"> &quot;London&quot;</span>
                       </span>
+                    </p>
+                  </div>
+                )}
+                {error && (
+                  <div>
+                    <p className="p-2 px-4 text-start text-gray-500">
+                      Something went wrong, please try again later.
                     </p>
                   </div>
                 )}

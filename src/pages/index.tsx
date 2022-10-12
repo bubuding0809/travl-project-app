@@ -75,6 +75,7 @@ const IndexPage: NextPageWithLayout = () => {
           <img
             src={`https://countryflagsapi.com/svg/${result!.alpha3}`}
             alt={`${result!.countryName} flag`}
+            width="300"
           />
         )}
       </div>
