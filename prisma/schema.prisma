@@ -66,20 +66,21 @@ model Airport {
 }
 
 model City {
-  cid        String     @id @db.VarChar(15)
-  cityName   String     @db.VarChar(50)
-  latitude   Float?     @db.Float
-  longitude  Float?     @db.Float
-  capital    String?    @db.VarChar(20)
-  alpha3     String     @db.VarChar(3)
-  population Int?
-  Country    Country    @relation(fields: [alpha3], references: [alpha3], onDelete: NoAction, onUpdate: NoAction, map: "city_ibfk_1")
-  Airport    Airport[]
-  Hospital   Hospital[]
-  Post       Post[]
+  cid         String     @id @db.VarChar(15)
+  cityName    String     @db.VarChar(50)
+  latitude    Float?     @db.Float
+  longitude   Float?     @db.Float
+  capital     String?    @db.VarChar(20)
+  alpha3      String     @db.VarChar(3)
+  population  Int?
+  countryName String?    @db.VarChar(50)
+  Country     Country    @relation(fields: [alpha3], references: [alpha3], onDelete: NoAction, onUpdate: NoAction, map: "city_ibfk_1")
+  Airport     Airport[]
+  Hospital    Hospital[]
+  Post        Post[]
 
   @@index([alpha3], map: "city_ibfk_1_idx")
-  @@fulltext([cityName], map: "FULLTEXT")
+  @@fulltext([cityName, countryName, alpha3], map: "FULLTEXT")
 }
 
 model Country {
