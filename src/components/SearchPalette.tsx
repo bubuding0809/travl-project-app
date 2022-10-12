@@ -1,5 +1,12 @@
 import { Dialog, Combobox, Transition } from "@headlessui/react";
-import { Dispatch, Fragment, SetStateAction, useEffect, useMemo } from "react";
+import {
+  Dispatch,
+  Fragment,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import cityList from "../data/cities.json";
 import { trpc } from "../utils/trpc";
@@ -23,6 +30,7 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
   setDebouncedQuery,
   setResult,
 }) => {
+  const initalRef = useRef<HTMLInputElement>(null);
   const {
     data: filteredCities,
     error,
@@ -31,14 +39,6 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
   } = trpc.useQuery(["city.getCityByFullTextSearch", { query }], {
     initialData: [],
   });
-  // const {
-  //   data: filteredCities,
-  //   error,
-  //   isFetching,
-  //   isLoading,
-  // } = trpc.useQuery(["city.getCityByCityName", { cityName: query }], {
-  //   initialData: [],
-  // });
 
   // Add key down listener to window
   useEffect(() => {
@@ -76,6 +76,7 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
       }}
     >
       <Dialog
+        initialFocus={initalRef}
         onClose={setOpen}
         className="fixed inset-0 overflow-y-auto p-4 pt-[20vh]"
       >
@@ -89,7 +90,7 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <Dialog.Overlay className="fixed inset-0 bg-gray-600/30 backdrop-blur-sm" />
+          <div className="fixed inset-0 bg-gray-600/30 backdrop-blur-sm" />
         </Transition.Child>
 
         {/* Search combobox */}
@@ -102,96 +103,101 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
           leaveFrom="opacity-100 scale-100"
           leaveTo="opacity-0 scale-75"
         >
-          <Combobox
-            onChange={city => {
-              // redirect to specific city page
-              // router.push(`/city/${city.cityId}`);
-              setOpen(false);
-              setResult(city);
-            }}
-            as="div"
-            className="relative mx-auto max-w-xl divide-y rounded-xl border bg-white shadow-2xl ring ring-indigo-700/30 ring-offset-2"
-          >
-            {/* Search input */}
-            <div className="flex items-center px-3">
-              <MagnifyingGlassIcon className="h-6 w-6 flex-grow text-gray-500" />
-              <Combobox.Input
-                onChange={event => {
-                  const query = event.target.value.trim();
-                  setDebouncedQuery(query);
-                }}
-                className="w-full border-none bg-transparent p-3 text-neutral placeholder-gray-400 focus:ring-0"
-                placeholder="Search..."
-                autoFocus
-              />
-              <button
-                className="rounded border bg-gray-100 p-1 px-1.5 font-bold shadow-md"
-                onClick={() => {
-                  if (!debouncedQuery) {
-                    setOpen(false);
-                  }
-                  setDebouncedQuery("");
-                  setQuery("");
-                }}
-              >
-                Esc
-              </button>
-            </div>
+          <Dialog.Panel className="relative mx-auto max-w-xl rounded-xl border bg-white shadow-2xl ring ring-indigo-700/30 ring-offset-2">
+            <Combobox
+              onChange={city => {
+                setOpen(false);
+                setResult(city);
+              }}
+              as="div"
+              className="divide-y"
+            >
+              {/* Search input */}
+              <div className="flex items-center px-3">
+                <MagnifyingGlassIcon className="h-6 w-6 flex-grow text-gray-500" />
+                <Combobox.Input
+                  ref={initalRef}
+                  onChange={event => {
+                    const query = event.target.value.trim();
+                    setDebouncedQuery(query);
+                  }}
+                  className="w-full border-none bg-transparent p-3 text-neutral placeholder-gray-400 focus:ring-0"
+                  placeholder="Search..."
+                />
+                <button
+                  className="rounded border bg-gray-100 p-1 px-1.5 font-bold shadow-md"
+                  onClick={() => {
+                    if (!debouncedQuery) {
+                      setOpen(false);
+                    }
+                    setDebouncedQuery("");
+                    setQuery("");
+                  }}
+                >
+                  Esc
+                </button>
+              </div>
 
-            {/* Filtered search options */}
-            {filteredCities!.length > 0 && (
-              <Combobox.Options className="max-h-96 overflow-y-auto p-2" static>
-                {filteredCities!.slice(0, 20).map(city => (
-                  <Combobox.Option key={city.cid} value={city}>
-                    {({ active }) => (
-                      <div
-                        className={`flex items-center gap-2 rounded-md p-2 ${
-                          active ? "bg-primary text-white" : "bg-white"
-                        }`}
-                      >
-                        <p className="font-bold">{city.cityName}</p>
-                        <p
-                          className={`${
-                            active ? "text-gray-400" : "text-gray-500"
-                          }`}
-                        >
-                          in {city.alpha3}
-                        </p>
-                      </div>
-                    )}
-                  </Combobox.Option>
-                ))}
-              </Combobox.Options>
-            )}
-            {query && filteredCities!.length === 0 && !isFetching && (
+              {/* Filtered search options */}
               <div>
-                <p className="p-2 px-4 text-start text-gray-500">
-                  No results found
-                </p>
+                {filteredCities!.length > 0 && (
+                  <Combobox.Options
+                    className="max-h-96 overflow-y-auto p-2"
+                    static
+                  >
+                    {filteredCities!.slice(0, 20).map(city => (
+                      <Combobox.Option key={city.cid} value={city}>
+                        {({ active }) => (
+                          <div
+                            className={`flex items-center gap-2 rounded-md p-2 ${
+                              active ? "bg-primary text-white" : "bg-white"
+                            }`}
+                          >
+                            <p className="font-bold">{city.cityName}</p>
+                            <p
+                              className={`${
+                                active ? "text-gray-400" : "text-gray-500"
+                              }`}
+                            >
+                              in {city.alpha3}
+                            </p>
+                          </div>
+                        )}
+                      </Combobox.Option>
+                    ))}
+                  </Combobox.Options>
+                )}
+                {query && filteredCities!.length === 0 && !isFetching && (
+                  <div>
+                    <p className="p-2 px-4 text-start text-gray-500">
+                      No results found
+                    </p>
+                  </div>
+                )}
+                {query && filteredCities!.length === 0 && isFetching && (
+                  <div className="flex items-center">
+                    <p className="p-2 px-4 text-start text-gray-500">
+                      Loading results...
+                    </p>
+                    <Spinner />
+                  </div>
+                )}
+                {!query && (
+                  <div>
+                    <p className="p-2 px-4 text-start text-gray-500">
+                      Start by typing a city name
+                      <span className="block">
+                        e.g.
+                        <span className="font-bold"> &quot;New York&quot;</span>
+                        or
+                        <span className="font-bold"> &quot;London&quot;</span>
+                      </span>
+                    </p>
+                  </div>
+                )}
               </div>
-            )}
-            {query && filteredCities!.length === 0 && isFetching && (
-              <div className="flex items-center">
-                <p className="p-2 px-4 text-start text-gray-500">
-                  Loading results...
-                </p>
-                <Spinner />
-              </div>
-            )}
-            {!query && (
-              <div>
-                <p className="p-2 px-4 text-start text-gray-500">
-                  Start by typing a city name
-                  <span className="block">
-                    e.g.
-                    <span className="font-bold"> &quot;New York&quot;</span>
-                    or
-                    <span className="font-bold"> &quot;London&quot;</span>
-                  </span>
-                </p>
-              </div>
-            )}
-          </Combobox>
+            </Combobox>
+          </Dialog.Panel>
         </Transition.Child>
       </Dialog>
     </Transition.Root>
