@@ -182,7 +182,7 @@ const Layout = ({ children, title }: Props) => {
         </div>
         {/* Sidebar ends */}
 
-        <div className="container mx-auto w-11/12 py-10 px-6 md:w-4/5">
+        <div className="px:4 container mx-auto h-screen w-11/12 overflow-y-auto py-6 sm:px-6 sm:py-10 md:w-4/5">
           <div className="h-full w-full">{children}</div>
         </div>
       </div>
