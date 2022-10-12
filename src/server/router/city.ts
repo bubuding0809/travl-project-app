@@ -1,6 +1,6 @@
 import { createRouter } from "./context";
 import { z } from "zod";
-import { City } from "@prisma/client";
+import { City, Country } from "@prisma/client";
 
 export const cityRouter = createRouter()
   .query("getCityByCityName", {
@@ -29,12 +29,24 @@ export const cityRouter = createRouter()
         return [];
       }
 
-      return (await ctx.prisma.$queryRaw`
-        SELECT *, MATCH(cityName, countryName, alpha3) AGAINST(${input.query}) as relevance
-        FROM City
-        WHERE MATCH(cityName, countryName, alpha3) AGAINST(${input.query})
+      const results = (await ctx.prisma.$queryRaw`
+        SELECT *, MATCH(City.cityName, City.countryName, City.alpha3) AGAINST(${input.query}) as relevance
+        FROM City INNER JOIN Country ON City.alpha3 = Country.alpha3
+        WHERE MATCH(City.cityName, City.countryName, City.alpha3) AGAINST(${input.query})
         ORDER BY relevance DESC
         LIMIT 25;
-      `) as (City & { relevance: number })[];
+      `) as (City & Country & { relevance: number })[];
+
+      return results.map(result => ({
+        ...result,
+        countryFlagEmoji: isoCountryCodeToFlagEmoji(result.alpha2),
+      }));
     },
   });
+
+function isoCountryCodeToFlagEmoji(country: string) {
+  return String.fromCodePoint(
+    // @ts-ignore
+    ...[...country.toUpperCase()].map(c => c.charCodeAt() + 0x1f1a5)
+  );
+}
