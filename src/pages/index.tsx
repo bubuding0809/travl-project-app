@@ -1,11 +1,12 @@
 import { ReactElement, useRef, useState } from "react";
 import Layout from "../components/Layout";
+import Image from "next/image";
 import { NextPageWithLayout } from "./_app";
 import SearchPalette from "../components/SearchPalette";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 const IndexPage: NextPageWithLayout = () => {
-  const [result, setResult] = useState(null);
+  const [result, setResult] = useState<{ [key: string]: string }>({});
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState(query);
@@ -66,10 +67,16 @@ const IndexPage: NextPageWithLayout = () => {
           setResult={setResult}
         />
       </div>
-      <div className="mt-10 flex h-full justify-center">
+      <div className="mt-10 flex h-full flex-col justify-center gap-2">
         <pre>
           <code>{JSON.stringify(result, null, 2)}</code>
         </pre>
+        {Object.keys(result).length != 0 && (
+          <img
+            src={`https://countryflagsapi.com/svg/${result!.alpha3}`}
+            alt={`${result!.countryName} flag`}
+          />
+        )}
       </div>
     </main>
   );
