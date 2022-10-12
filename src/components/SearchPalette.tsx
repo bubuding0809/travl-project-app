@@ -1,14 +1,6 @@
 import { Dialog, Combobox, Transition } from "@headlessui/react";
-import {
-  Dispatch,
-  Fragment,
-  SetStateAction,
-  useEffect,
-  useMemo,
-  useRef,
-} from "react";
-import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import cityList from "../data/cities.json";
+import { Dispatch, Fragment, SetStateAction, useEffect } from "react";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { trpc } from "../utils/trpc";
 import Spinner from "./Spinner";
 
@@ -30,7 +22,6 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
   setDebouncedQuery,
   setResult,
 }) => {
-  const initalRef = useRef<HTMLInputElement>(null);
   const {
     data: filteredCities,
     error,
@@ -76,7 +67,6 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
       }}
     >
       <Dialog
-        initialFocus={initalRef}
         onClose={setOpen}
         className="fixed inset-0 overflow-y-auto p-6 pt-9 sm:pt-[20vh]"
       >
@@ -116,7 +106,6 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
               <div className="flex items-center px-3">
                 <MagnifyingGlassIcon className="h-6 w-6 flex-grow text-gray-500" />
                 <Combobox.Input
-                  ref={initalRef}
                   onChange={event => {
                     const query = event.target.value.trim();
                     setDebouncedQuery(query);
@@ -159,8 +148,11 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
                                 active ? "text-gray-400" : "text-gray-500"
                               }`}
                             >
-                              in {city.alpha3}
+                              in {city.countryName}
                             </p>
+                            <span className="ml-auto mr-2 text-xl">
+                              {city.countryFlagEmoji}
+                            </span>
                           </div>
                         )}
                       </Combobox.Option>
