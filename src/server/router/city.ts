@@ -1,5 +1,6 @@
 import { createRouter } from "./context";
 import { z } from "zod";
+import { City } from "@prisma/client";
 
 export const cityRouter = createRouter()
   .query("getCityByCityName", {
@@ -27,17 +28,13 @@ export const cityRouter = createRouter()
       if (!input.query) {
         return [];
       }
-      return await ctx.prisma.city.findMany({
-        where: {
-          cityName: {
-            search: input.query,
-          },
-          // Country: {
-          //   countryName: {
-          //     search: input.query,
-          //   },
-          // },
-        },
-      });
+
+      return (await ctx.prisma.$queryRaw`
+        SELECT *, MATCH(cityName, countryName, alpha3) AGAINST(${input.query}) as relevance
+        FROM City
+        WHERE MATCH(cityName, countryName, alpha3) AGAINST(${input.query})
+        ORDER BY relevance DESC
+        LIMIT 25;
+      `) as (City & { relevance: number })[];
     },
   });
