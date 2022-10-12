@@ -78,7 +78,7 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
       <Dialog
         initialFocus={initalRef}
         onClose={setOpen}
-        className="fixed inset-0 overflow-y-auto p-4 pt-[20vh]"
+        className="fixed inset-0 overflow-y-auto p-6 pt-9 sm:pt-[20vh]"
       >
         {/* Overlay */}
         <Transition.Child
