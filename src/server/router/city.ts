@@ -3,6 +3,8 @@ import { z } from "zod";
 import { City, Country } from "@prisma/client";
 import isoCountryCodeToFlagEmoji from "../../utils/helpers/isoCountryCodeToFlagEmoji";
 
+export type CityWithCountry = City & Country;
+
 export const cityRouter = createRouter()
   .query("getCityByCityName", {
     input: z.object({
@@ -36,7 +38,7 @@ export const cityRouter = createRouter()
         WHERE MATCH(City.cityName, City.countryName, City.alpha3) AGAINST(${input.query})
         ORDER BY relevance DESC
         LIMIT 25;
-      `) as (City & Country & { relevance: number })[];
+      `) as (CityWithCountry & { relevance: number })[];
 
       return results.map(result => ({
         ...result,
