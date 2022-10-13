@@ -8,7 +8,6 @@ import { CityWithCountry } from "../server/router/city";
 import { trpc } from "../utils/trpc";
 import { GetServerSideProps } from "next";
 import { prisma } from "../server/db/client";
-import { resourceLimits } from "worker_threads";
 
 type IndexPageProps = {
   randomCity: CityWithCountry;
@@ -28,21 +27,21 @@ const IndexPage: NextPageWithLayout<IndexPageProps> = ({ randomCity }) => {
     {
       date: new Date(today!),
       currencyBase: "SGD",
-      currencyAgainst: result?.isoCode!,
+      currencyAgainst: result!.isoCode!,
     },
   ]);
 
   const covidQuery = trpc.useQuery([
     "covid.getLatestEntryByAlpha3",
     {
-      alpha3: result?.alpha3!,
+      alpha3: result!.alpha3!,
     },
   ]);
 
   const covidQueryHistory = trpc.useQuery([
     "covid.getMonthWithHighestNewCasesByYear",
     {
-      alpha3: result?.alpha3!,
+      alpha3: result!.alpha3!,
       year: 2022,
     },
   ]);
