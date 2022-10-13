@@ -5,13 +5,41 @@ import { GetServerSideProps } from "next";
 import { signOut } from "next-auth/react";
 import Spinner from "./Spinner";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 type Props = {
   children?: ReactNode;
   title?: string;
 };
 
+const sideBarItems = {
+  home: {
+    name: "Home",
+    icon: "/home.gif",
+    href: "/",
+  },
+  explore: {
+    name: "Explore",
+    icon: "/explore.gif",
+    href: "/explore",
+  },
+  flights: {
+    name: "Flights",
+    icon: "/flights.gif",
+    href: "/flights",
+  },
+  Tickets: {
+    name: "Tickets",
+    icon: "/tickets.gif",
+    href: "/tickets",
+  },
+};
+
+const active =
+  "rounded-lg border-white/30 bg-gradient-to-br from-emerald-300 to-indigo-500 translate-x-2 text-white ring ring-indigo-500/30 shadow-gray-500/50 shadow-sm";
+
 const Layout = ({ children, title }: Props) => {
+  const router = useRouter();
   const { data: session, status } = useSession();
   return (
     <>
@@ -34,34 +62,22 @@ const Layout = ({ children, title }: Props) => {
           {/* Sidebar items */}
           <div className="my-2 flex h-full flex-col justify-between p-2">
             <ul>
-              <li className="mb-2 flex w-full cursor-pointer items-center justify-start rounded-lg border bg-neutral-focus py-3 px-2 text-gray-300 hover:text-gray-500">
-                <img src="home.gif" className="h-auto w-6 rounded-md" />
-
-                <span className="ml-2 text-sm">Home</span>
-              </li>
-              <li className="mb-2 flex w-full cursor-pointer items-center justify-start py-3 px-2 text-gray-300 hover:text-gray-500">
-                <img src="worldwide.gif" className="h-auto w-6 rounded-md" />
-
-                <span className="ml-2 text-sm">Explore</span>
-                {/* <div className="flex items-center justify-center rounded bg-gray-700 py-1 px-3 text-xs text-gray-500">
-                  5
-                </div> */}
-              </li>
-              <li className="mb-2 flex w-full cursor-pointer items-center justify-start py-3 px-2 text-gray-300 hover:text-gray-500">
-                <img src="airplane.gif" className="h-auto w-6 rounded-md" />
-                <span className="ml-2 text-sm">Flights</span>
-                {/* <div className="flex items-center justify-center rounded bg-gray-700 py-1 px-3 text-xs text-gray-500">
-                  5
-                </div> */}
-              </li>
-              <li className="mb-2 flex w-full cursor-pointer items-center justify-start py-3 px-2 text-gray-300 hover:text-gray-500">
-                <img src="ticket.gif" className="h-auto w-6 rounded-md" />
-
-                <span className="ml-2 text-sm">Tickets</span>
-                {/* <div className="flex items-center justify-center rounded bg-gray-700 py-1 px-3 text-xs text-gray-500">
-                  5
-                </div> */}
-              </li>
+              {Object.entries(sideBarItems).map(([key, value]) => (
+                <Link href={value.href} key={key}>
+                  <li
+                    className={`mb-2 flex w-full cursor-pointer items-center justify-start py-3 px-2 text-gray-300 transition-transform duration-300 hover:text-gray-500 ${
+                      router.asPath === value.href ? active : ""
+                    }`}
+                  >
+                    <img
+                      src={value.icon}
+                      className="h-auto w-6 rounded-md"
+                      alt={`${value.name} icon`}
+                    />
+                    <span className="ml-2 text-sm">{value.name}</span>
+                  </li>
+                </Link>
+              ))}
             </ul>
             {status === "loading" ? (
               <Spinner />
@@ -102,7 +118,7 @@ const Layout = ({ children, title }: Props) => {
           </div>
 
           {/* Bottom nav items */}
-          <div className="mt-auto border-t border-gray-700 px-8">
+          {/* <div className="mt-auto border-t border-gray-700 px-8">
             <ul className="flex w-full items-center justify-between bg-gray-800">
               <li className="cursor-pointer pt-5 pb-3 text-white">
                 <svg
@@ -178,11 +194,11 @@ const Layout = ({ children, title }: Props) => {
                 </svg>
               </li>
             </ul>
-          </div>
+          </div> */}
         </div>
         {/* Sidebar ends */}
 
-        <div className="px:4 container mx-auto h-screen w-11/12 overflow-y-auto py-6 sm:px-6 sm:py-10 md:w-4/5">
+        <div className="container mx-auto h-screen overflow-y-auto p-4 sm:p-8">
           <div className="h-full w-full">{children}</div>
         </div>
       </div>
