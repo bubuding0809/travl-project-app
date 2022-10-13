@@ -1,6 +1,7 @@
 import { createRouter } from "./context";
 import { z } from "zod";
 import { City, Country } from "@prisma/client";
+import isoCountryCodeToFlagEmoji from "../../utils/helpers/isoCountryCodeToFlagEmoji";
 
 export const cityRouter = createRouter()
   .query("getCityByCityName", {
@@ -43,10 +44,3 @@ export const cityRouter = createRouter()
       }));
     },
   });
-
-function isoCountryCodeToFlagEmoji(country: string) {
-  return String.fromCodePoint(
-    // @ts-ignore
-    ...[...country.toUpperCase()].map(c => c.charCodeAt() + 0x1f1a5)
-  );
-}
