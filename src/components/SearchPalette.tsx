@@ -1,6 +1,7 @@
 import { Dialog, Combobox, Transition } from "@headlessui/react";
 import { Dispatch, Fragment, SetStateAction, useEffect, useRef } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { CityWithCountry } from "../server/router/city";
 import { trpc } from "../utils/trpc";
 import Spinner from "./Spinner";
 
@@ -98,7 +99,7 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
         >
           <Dialog.Panel className="relative mx-auto max-w-xl rounded-xl border bg-white shadow-2xl ring ring-indigo-700/30 ring-offset-2">
             <Combobox
-              onChange={city => {
+              onChange={(city: CityWithCountry) => {
                 setOpen(false);
                 setResult(city);
               }}
@@ -138,7 +139,7 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
                     className="max-h-96 overflow-y-auto p-2"
                     static
                   >
-                    {filteredCities!.slice(0, 20).map(city => (
+                    {filteredCities!.map(city => (
                       <Combobox.Option key={city.cid} value={city}>
                         {({ active }) => (
                           <div
@@ -184,7 +185,10 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
                       Start by typing a city name
                       <span className="block">
                         e.g.
-                        <span className="font-bold"> &quot;New York&quot;</span>
+                        <span className="font-bold">
+                          {" "}
+                          &quot;New York&quot;{" "}
+                        </span>
                         or
                         <span className="font-bold"> &quot;London&quot;</span>
                       </span>
