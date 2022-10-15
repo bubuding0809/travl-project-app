@@ -31,10 +31,7 @@ export const covidRouter = createRouter()
       year: z.number().min(2020),
     }),
     async resolve({ input, ctx }) {
-      if (!input?.alpha3 || !input?.year) {
-        return null;
-      }
-      return (await ctx.prisma.$queryRaw`
+      const data = (await ctx.prisma.$queryRaw`
         SELECT MONTHNAME(C.entryDate) AS month, ROUND(AVG(C.newCaseNo)) AS dailyAverage
         FROM Covid C, Country Cn 
         WHERE C.alpha3=Cn.alpha3 AND Cn.alpha3 = ${input.alpha3} AND YEAR(C.entryDate) = ${input.year}
@@ -42,5 +39,7 @@ export const covidRouter = createRouter()
         ORDER BY dailyAverage DESC
         LIMIT 1;
       `) as CovidHistory[];
+
+      return data[0] ?? null;
     },
   });
