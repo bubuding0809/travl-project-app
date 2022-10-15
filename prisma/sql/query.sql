@@ -3,15 +3,6 @@ SELECT H.hospitalName, C1.cityName, H.address, C2.countryName
 FROM Hospital H, City C1, Country C2
 WHERE H.cid = C1.cid AND C1.alpha3=C2.alpha3 AND C1.cityName LIKE 'Beijing';
 
-# Hospital - get hospitals that are within 50km with reference from the coordinates of the city beijing
-SELECT H.hospitalName, 
-ST_Distance_shpere(
-	point((SELECT longitude FROM City WHERE City.cityName='Beijing'), (SELECT latitude FROM City WHERE City.cityName='Beijing')), 
-    point(H.longitude, H.latitude)) 
-    as distanceFromOrigin
-FROM Hospital H, City C
-WHERE H.cid = C.cid AND distanceFromOrigin < 500000;
-
 # City - find cities with the name springfield that is located in a country called United States
 SELECT *
 FROM City C1, Country C2
@@ -34,7 +25,7 @@ WHERE A.cid=C1.cid AND C1.alpha3=C2.alpha3
 GROUP BY C2.alpha3, C1.cid
 HAVING COUNT(DISTINCT A.icao) > 1;
 
-# Aiport - find airports at city of Johannesburg in South Africa
+# Airport - find airports at city of Johannesburg in South Africa
 SELECT A.icao, A.airportName, A.timezone
 FROM Airport A, City C1, Country C2
 WHERE A.cid=C1.cid AND C1.alpha3=C2.alpha3 AND C2.countryName='South Africa' AND C1.cityName='Johannesburg';
@@ -79,14 +70,13 @@ LIMIT 1;
 
 # -----------------------------------------------------------------------------------------------------------------
 
--- # Find all hospitasl and address of the hospital within 50Km of the city named Beijing.
+-- # Find all hospitals and address of the hospital within 50Km of the city named Beijing.
 SET @sourceX = (SELECT longitude FROM City WHERE cityName LIKE 'Beijing' LIMIT 1);
 SET @sourceY = (SELECT latitude FROM City WHERE cityName LIKE 'Beijing' LIMIT 1);
 SET @radius = 10000;
 SELECT H.hospitalName, H.address, ROUND(ST_DISTANCE_SPHERE(POINT(@sourceX, @sourceY), POINT(H.longitude, H.latitude))/1000, 2) as distance_km
-FROM Hospital_Temp H, City C
-WHERE H.cid = C.cid AND ST_DISTANCE_SPHERE(POINT(@sourceX, @sourceY), POINT(H.longitude, H.latitude)) < @radius
-ORDER BY distance_km ASC;
+FROM Hospital H, City C
+WHERE H.cid = C.cid AND ST_DISTANCE_SPHERE(POINT(@sourceX, @sourceY), POINT(H.longitude, H.latitude)) < @radius;
 
 -- # What is the average amount of Thai Bhat I can get for $100 of SGD in January of 2022?
 SELECT ROUND(100*AVG(rate)) AS THB, AVG(rate) AS avg_rate
@@ -121,10 +111,16 @@ SELECT Aorigin.airportName, Adest.airportName, F.priceUSD, P.firstName, P.lastNa
 FROM Airport Aorigin, Airport Adest, Flight F, Passenger P, Ticket_buy TB, User U
 WHERE F.originAirport = Aorigin.icao AND F.destAirport = Adest.icao 
 	  AND TB.uid = U.id AND TB.fid = F.fid AND TB.pid = P.pid 
-	  AND U.name = 'Amri99' AND DATE_FORMAT(TB.createdAt, '%Y-%m') = '2022-10'
+	  AND U.name = 'Amri99' AND DATE_FORMAT(TB.createdAt, '%Y-%m') = '2022-10';
 
-
-
-
-
-
+SELECT *
+FROM (SELECT * FROM Airport WHERE cid = '1156228865'
+        UNION DISTINCT
+        SELECT * FROM Airport
+        ORDER BY ST_Distance_Sphere(
+        POINT(longitude, latitude),
+        POINT((SELECT C1.longitude FROM City C1 WHERE cid = '1156228865'), (SELECT C2.latitude FROM City C2 Where cid = '1156228865'))
+    )
+LIMIT 3) as NearByAirports
+WHERE iata IS NOT NULL
+LIMIT 10;
