@@ -43,7 +43,14 @@ const AirTravelCard: React.FC<AirTravelCardProps> = ({ city, alpha3 }) => {
         Air Travel
         <p className="ml-auto text-xs text-gray-500">
           Last updated:{" "}
-          <span className="block font-bold text-gray-900 underline"></span>
+          <span className="block font-bold text-gray-900 underline">
+            {new Date("2022-10-01").toLocaleDateString("en-SG", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </span>
         </p>
       </div>
       <div className="divider my-0 rounded px-2" />
@@ -123,13 +130,13 @@ const AirTravelCard: React.FC<AirTravelCardProps> = ({ city, alpha3 }) => {
         </div>
         <div className="flex h-full max-h-72 flex-grow flex-col">
           <h1>Flights:</h1>
-          <ul className="flex flex-col gap-1 overflow-y-auto rounded-lg border p-2">
+          <ul className="scroll flex flex-col gap-1 overflow-y-auto rounded-l-lg border p-2">
             {flightQuery.data &&
               flightQuery.data.map((flight, idx) => {
                 return (
                   <li
                     key={idx}
-                    className="flex flex-col rounded-lg border bg-white px-2 py-1 shadow-sm shadow-teal-800/50"
+                    className="flex flex-col rounded-lg border bg-white px-2 py-1 shadow-sm"
                   >
                     <p className="text-gray-900">
                       {flight.originAirport} - {flight.destAirport}
@@ -142,8 +149,8 @@ const AirTravelCard: React.FC<AirTravelCardProps> = ({ city, alpha3 }) => {
                         day: "numeric",
                         hour: "numeric",
                         minute: "numeric",
-                      })}{" "}
-                      -{" "}
+                      })}
+                      <span className="block font-bold sm:inline"> --- </span>
                       {flight.arriveDateTime.toLocaleDateString("en-SG", {
                         weekday: "long",
                         year: "numeric",

@@ -150,7 +150,7 @@ const IndexPage: NextPageWithLayout<IndexPageProps> = ({ randomCity }) => {
               </p>
             </div>
             <div className="divider my-0 rounded px-2" />
-            <div className="flex w-full flex-wrap justify-between gap-2 px-4 pb-4">
+            <div className="flex h-full w-full flex-wrap items-start justify-between gap-2 px-4 pb-4">
               <div className="flex h-auto flex-col self-start">
                 <h2 className="text-xl font-bold">
                   {
@@ -160,12 +160,12 @@ const IndexPage: NextPageWithLayout<IndexPageProps> = ({ randomCity }) => {
                 </h2>
               </div>
               <div className="flex w-full items-center justify-between">
-                <div className="w-2/5 rounded-md border p-2 text-center font-extrabold">
+                <div className="w-2/5 rounded-md bg-white p-2 text-center font-extrabold shadow-md">
                   <p className="font-normal">SGD</p>
                   <p>1</p>
                 </div>
                 =
-                <div className="w-2/5 rounded-md border p-2 text-center font-extrabold">
+                <div className="w-2/5 rounded-md bg-white p-2 text-center font-extrabold shadow-md">
                   <p className="font-normal">{result.isoCode}</p>
                   {forexQuery.data ? (
                     <p>{forexQuery.data?.rate.toFixed(2)}</p>
@@ -174,6 +174,9 @@ const IndexPage: NextPageWithLayout<IndexPageProps> = ({ randomCity }) => {
                   )}
                 </div>
               </div>
+              <button className="btn btn-block mt-auto border-none bg-gradient-to-br from-sky-500 to-indigo-500">
+                Historical converter
+              </button>
             </div>
           </div>
 
@@ -185,10 +188,10 @@ const IndexPage: NextPageWithLayout<IndexPageProps> = ({ randomCity }) => {
         </div>
       )}
 
-      <pre>
+      {/* <pre>
         <code>{JSON.stringify(result, null, 2)}</code>,{" "}
         <code>{JSON.stringify(forexQuery.data, null, 2)}</code>
-      </pre>
+      </pre> */}
       {/* Bottom spacer */}
       <div className="p-8"></div>
     </main>
