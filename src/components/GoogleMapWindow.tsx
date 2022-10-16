@@ -105,6 +105,7 @@ const GoogleMapWindow: React.FC<GoogleMapWindowProps> = ({
             <a
               className="link link-primary"
               target={"_blank"}
+              rel="noreferrer"
               href={`https://www.google.com/maps/search/?api=1&query=${selected.hospitalName}`}
             >
               View on Google Map
