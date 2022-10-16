@@ -2,10 +2,12 @@ import React from "react";
 import {
   Circle,
   GoogleMap,
+  InfoWindow,
   Marker,
   useJsApiLoader,
 } from "@react-google-maps/api";
 import { HospitalProximity } from "../server/router/hospital";
+import { env } from "../env/client.mjs";
 
 type GoogleMapWindowProps = {
   center: {
@@ -27,8 +29,13 @@ const GoogleMapWindow: React.FC<GoogleMapWindowProps> = ({
 }) => {
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
-    googleMapsApiKey: "AIzaSyB469uMOR4R5xNE9-Yq-9_JbqKo-bKda0A",
+    googleMapsApiKey: env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
   });
+
+  const [selected, setSelected] = React.useState<HospitalProximity | null>(
+    null
+  );
+  const [isOpen, setIsOpen] = React.useState(false);
 
   const [map, setMap] = React.useState(null);
 
@@ -46,7 +53,7 @@ const GoogleMapWindow: React.FC<GoogleMapWindowProps> = ({
     <GoogleMap
       mapContainerStyle={containerStyle}
       center={center}
-      zoom={10}
+      zoom={12}
       onLoad={onLoad}
       onUnmount={onUnmount}
       options={{
@@ -80,6 +87,31 @@ const GoogleMapWindow: React.FC<GoogleMapWindowProps> = ({
           zIndex: 1,
         }}
       />
+      {selected && isOpen && (
+        <InfoWindow
+          onCloseClick={() => {
+            setIsOpen(false);
+          }}
+          position={{
+            lat: selected.latitude!,
+            lng: selected.longitude!,
+          }}
+        >
+          <div>
+            <h2 className="font-bold">{selected.hospitalName}</h2>
+            <p>{selected.address}</p>
+            <p>Phone No: {selected.phoneNo}</p>
+            <p>{selected.distance} km away from center</p>
+            <a
+              className="link link-primary"
+              target={"_blank"}
+              href={`https://www.google.com/maps/search/?api=1&query=${selected.hospitalName}`}
+            >
+              View on Google Map
+            </a>
+          </div>
+        </InfoWindow>
+      )}
       {hospitals?.map(hospital => (
         <Marker
           key={hospital.hid}
@@ -89,6 +121,10 @@ const GoogleMapWindow: React.FC<GoogleMapWindowProps> = ({
           }}
           clickable={true}
           animation={4}
+          onClick={() => {
+            setSelected(hospital);
+            setIsOpen(true);
+          }}
         />
       ))}
     </GoogleMap>
