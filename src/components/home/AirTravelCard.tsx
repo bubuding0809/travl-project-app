@@ -5,11 +5,20 @@ import { trpc } from "../../utils/trpc";
 
 type AirTravelCardProps = {
   city: string;
-  alpha3: string;
 };
 
-const AirTravelCard: React.FC<AirTravelCardProps> = ({ city, alpha3 }) => {
+const today = new Date();
+const AirTravelCard: React.FC<AirTravelCardProps> = ({ city }) => {
   const airportQuery = trpc.useQuery(["travel.getAirportsByCity", { city }]);
+  const [selectedAirport, setSelectedAirport] = useState(
+    airportQuery.data && airportQuery.data.length > 0
+      ? airportQuery.data[0]
+      : {
+          airportName: "No airport found",
+          icao: "",
+        }
+  );
+
   useEffect(() => {
     setSelectedAirport(
       airportQuery.data && airportQuery.data.length > 0
@@ -20,20 +29,13 @@ const AirTravelCard: React.FC<AirTravelCardProps> = ({ city, alpha3 }) => {
           }
     );
   }, [airportQuery.data]);
-  const [selectedAirport, setSelectedAirport] = useState(
-    airportQuery.data && airportQuery.data.length > 0
-      ? airportQuery.data[0]
-      : {
-          airportName: "No airport found",
-          icao: "",
-        }
-  );
+
   const flightQuery = trpc.useQuery([
     "travel.getFlightsByAirport",
     {
       originAirportIcao: "WSSS",
       destinationAirportIcao: selectedAirport!.icao,
-      date: "2022-11-20",
+      date: today!,
     },
   ]);
 
@@ -130,7 +132,7 @@ const AirTravelCard: React.FC<AirTravelCardProps> = ({ city, alpha3 }) => {
         </div>
         <div className="flex h-full max-h-72 flex-grow flex-col">
           <h1>Flights:</h1>
-          <ul className="scroll flex flex-col gap-1 overflow-y-auto rounded-l-lg border p-2">
+          <ul className="scroll flex flex-col gap-1 overflow-y-auto rounded-l-lg border p-2 shadow-inner">
             {flightQuery.data &&
               flightQuery.data.map((flight, idx) => {
                 return (
@@ -138,9 +140,7 @@ const AirTravelCard: React.FC<AirTravelCardProps> = ({ city, alpha3 }) => {
                     key={idx}
                     className="flex flex-col rounded-lg border bg-white px-2 py-1 shadow-sm"
                   >
-                    <p className="text-gray-900">
-                      {flight.originAirport} - {flight.destAirport}
-                    </p>
+                    <p className="text-gray-900">SIN - {flight.iata}</p>
                     <p className="text-gray-500">
                       {flight.departDateTime.toLocaleDateString("en-SG", {
                         weekday: "long",

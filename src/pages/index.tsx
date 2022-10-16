@@ -1,15 +1,15 @@
 import { ReactElement, useRef, useState } from "react";
-import { useDebounce } from "../utils/hooks/useDebounce";
 import Layout from "../components/Layout";
 import { NextPageWithLayout } from "./_app";
 import SearchPalette from "../components/SearchPalette";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { CityWithCountry } from "../server/router/city";
 import { trpc } from "../utils/trpc";
 import { GetServerSideProps } from "next";
 import { prisma } from "../server/db/client";
 import CovidCard from "../components/home/CovidCard";
 import AirTravelCard from "../components/home/AirTravelCard";
+import SearchBar from "../components/home/SearchBar";
+import HospitalCard from "../components/home/HospitalCard";
 
 type IndexPageProps = {
   randomCity: CityWithCountry;
@@ -20,8 +20,6 @@ const today = new Date().toISOString().split("T")[0];
 const IndexPage: NextPageWithLayout<IndexPageProps> = ({ randomCity }) => {
   const [result, setResult] = useState<CityWithCountry | null>(randomCity);
   const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState(query);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const forexQuery = trpc.useQuery([
@@ -35,61 +33,9 @@ const IndexPage: NextPageWithLayout<IndexPageProps> = ({ randomCity }) => {
 
   return (
     <main className="flex flex-col gap-2">
+      <SearchPalette setResult={setResult} open={open} setOpen={setOpen} />
       {/* Search bar */}
-      <div className="sticky top-0 z-10 flex w-full items-center gap-4 rounded-xl border border-white/30 bg-[#f7f7f7]/50 p-3 shadow-xl backdrop-blur-md sm:px-4">
-        <div className="hidden flex-col sm:flex">
-          <div className="breadcrumbs text-sm">
-            <ul>
-              <li>
-                <a>Pages</a>
-              </li>
-              <li>
-                <a>Home</a>
-              </li>
-            </ul>
-            <h1 className="text-xl font-bold">Home</h1>
-          </div>
-        </div>
-        <div
-          className={`relative flex w-full items-center rounded-xl border bg-white px-3 ring ring-offset-2 sm:ml-2 ${
-            open ? "ring-indigo-700/30" : "ring-black/5"
-          }`}
-        >
-          <MagnifyingGlassIcon className="h-auto w-6 text-gray-500" />
-          <input
-            ref={inputRef}
-            type="text"
-            onChange={event => {
-              setDebouncedQuery(event.target.value);
-            }}
-            className="w-full border-none bg-transparent p-3 text-neutral placeholder-gray-400 focus:ring-0"
-            placeholder="Search..."
-            onFocus={() => {
-              setOpen(true);
-              inputRef.current?.blur();
-            }}
-            value={debouncedQuery}
-          />
-          <div className="space-x-1">
-            <span className="rounded border bg-gray-100 p-1 px-1.5 font-bold shadow-md">
-              ⌘
-            </span>
-            <span className="rounded border bg-gray-100 p-1 px-1.5 font-bold shadow-md">
-              K
-            </span>
-          </div>
-        </div>
-        <SearchPalette
-          open={open}
-          query={query}
-          debouncedQuery={debouncedQuery}
-          setOpen={setOpen}
-          setQuery={setQuery}
-          setDebouncedQuery={setDebouncedQuery}
-          setResult={setResult}
-        />
-      </div>
-
+      <SearchBar innerRef={inputRef} open={open} setOpen={setOpen} />
       {/* City information */}
       {result && (
         <div className="grid h-full grid-cols-1 gap-4 p-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -184,7 +130,17 @@ const IndexPage: NextPageWithLayout<IndexPageProps> = ({ randomCity }) => {
           <CovidCard countryAlpha3={result.alpha3} />
 
           {/* Flight and Aiport information */}
-          <AirTravelCard city={result.cid} alpha3={result.alpha3} />
+          <AirTravelCard city={result.cid} />
+
+          {/* Hospitals information */}
+          <HospitalCard
+            city={{
+              cid: result.cid,
+              cityName: result.cityName,
+              latitude: result.latitude!,
+              longitude: result.longitude!,
+            }}
+          />
         </div>
       )}
 
@@ -192,6 +148,7 @@ const IndexPage: NextPageWithLayout<IndexPageProps> = ({ randomCity }) => {
         <code>{JSON.stringify(result, null, 2)}</code>,{" "}
         <code>{JSON.stringify(forexQuery.data, null, 2)}</code>
       </pre> */}
+
       {/* Bottom spacer */}
       <div className="p-8"></div>
     </main>

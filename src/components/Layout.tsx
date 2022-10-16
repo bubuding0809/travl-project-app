@@ -40,6 +40,25 @@ const active =
 
 const Layout = ({ children, title }: Props) => {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const handleStart = (url: string) =>
+      url !== router.asPath && setLoading(true);
+    const handleComplete = (url: string) =>
+      url === router.asPath && setLoading(false);
+
+    router.events.on("routeChangeStart", handleStart);
+    router.events.on("routeChangeComplete", handleComplete);
+    router.events.on("routeChangeError", handleComplete);
+
+    return () => {
+      router.events.off("routeChangeStart", handleStart);
+      router.events.off("routeChangeComplete", handleComplete);
+      router.events.off("routeChangeError", handleComplete);
+    };
+  });
+
   const { data: session, status } = useSession();
   return (
     <>
@@ -53,7 +72,7 @@ const Layout = ({ children, title }: Props) => {
         <div className="relative hidden h-screen w-64 flex-col justify-start bg-gray-800 p-2 shadow sm:relative sm:flex">
           {/* Logo */}
           <div className="flex items-center gap-2 border-b border-gray-100/50 p-4">
-            <img src="travl-logo-light.png" className="h-auto w-32" />
+            <img src="travl-logo-light.png" className="mx-auto h-auto w-36" />
             {/* <h1 className="bg-gradient-to-r from-emerald-300 to-indigo-500 bg-clip-text font-serif text-4xl font-bold text-transparent">
               travl
             </h1> */}
@@ -62,19 +81,19 @@ const Layout = ({ children, title }: Props) => {
           {/* Sidebar items */}
           <div className="my-2 flex h-full flex-col justify-between p-2">
             <ul>
-              {Object.entries(sideBarItems).map(([key, value]) => (
-                <Link href={value.href} key={key}>
+              {Object.entries(sideBarItems).map(([key, item]) => (
+                <Link href={item.href} key={key}>
                   <li
                     className={`mb-2 flex w-full cursor-pointer items-center justify-start py-3 px-2 text-gray-300 transition-transform duration-300 hover:text-gray-500 ${
-                      router.asPath === value.href ? active : ""
+                      router.asPath === item.href ? active : ""
                     }`}
                   >
                     <img
-                      src={value.icon}
+                      src={item.icon}
                       className="h-auto w-6 rounded-md"
-                      alt={`${value.name} icon`}
+                      alt={`${item.name} icon`}
                     />
-                    <span className="ml-2 text-sm">{value.name}</span>
+                    <span className="ml-2 text-white">{item.name}</span>
                   </li>
                 </Link>
               ))}
@@ -116,7 +135,6 @@ const Layout = ({ children, title }: Props) => {
               </button>
             )}
           </div>
-
           {/* Bottom nav items */}
           {/* <div className="mt-auto border-t border-gray-700 px-8">
             <ul className="flex w-full items-center justify-between bg-gray-800">
@@ -198,8 +216,14 @@ const Layout = ({ children, title }: Props) => {
         </div>
         {/* Sidebar ends */}
 
-        <div className="container mx-auto h-screen overflow-y-auto p-4 sm:p-8">
-          <div className="h-full w-full">{children}</div>
+        <div className="h-screen w-full overflow-y-auto p-4 sm:p-8">
+          {loading ? (
+            <div className="flex h-full w-full items-center justify-center">
+              <p className="text-3xl font-bold">Loading...</p>
+            </div>
+          ) : (
+            <div className="h-full w-full">{children}</div>
+          )}
         </div>
       </div>
     </>

@@ -21,11 +21,9 @@ export const forexRouter = createRouter().query("getForexByDate", {
     });
 
     if (result) {
-      console.log("FOUND RESULT");
       return result;
     }
 
-    // TODO: implement forex api call
     try {
       const response = await fetch(
         `https://api.exchangerate.host/convert?from=${input.currencyBase}&to=${

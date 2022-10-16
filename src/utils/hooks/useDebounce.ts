@@ -1,17 +1,24 @@
-import { useEffect, useState } from "react";
+import { Dispatch, useEffect, useState } from "react";
 
-export const useDebounce = (value: string, delay: number) => {
-  const [debouncedValue, setDebouncedValue] = useState(value);
+type UseDebounceType = <T>(value: T, delay?: number) => [T, Dispatch<T>, T];
+
+export const useDebounce: UseDebounceType = (value, delay) => {
+  const [liveValue, setLiveValue] = useState(value);
+  const [debouncedValue, setDebouncedValue] = useState(liveValue);
 
   useEffect(() => {
     const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
+      setDebouncedValue(liveValue);
+    }, delay || 500);
 
     return () => {
       clearTimeout(handler);
     };
-  }, [value, delay]);
+  }, [liveValue, delay]);
 
-  return debouncedValue;
+  return [liveValue, setLiveValue, debouncedValue] as [
+    typeof liveValue,
+    typeof setLiveValue,
+    typeof debouncedValue
+  ];
 };

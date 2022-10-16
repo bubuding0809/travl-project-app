@@ -71,12 +71,13 @@ LIMIT 1;
 # -----------------------------------------------------------------------------------------------------------------
 
 -- # Find all hospitals and address of the hospital within 50Km of the city named Beijing.
-SET @sourceX = (SELECT longitude FROM City WHERE cityName LIKE 'Beijing' LIMIT 1);
-SET @sourceY = (SELECT latitude FROM City WHERE cityName LIKE 'Beijing' LIMIT 1);
+SET @sourceX = (SELECT longitude FROM City WHERE cid = '1156228865');
+SET @sourceY = (SELECT latitude FROM City WHERE cid = '1156228865');
 SET @radius = 10000;
-SELECT H.hospitalName, H.address, ROUND(ST_DISTANCE_SPHERE(POINT(@sourceX, @sourceY), POINT(H.longitude, H.latitude))/1000, 2) as distance_km
-FROM Hospital H, City C
-WHERE H.cid = C.cid AND ST_DISTANCE_SPHERE(POINT(@sourceX, @sourceY), POINT(H.longitude, H.latitude)) < @radius;
+SELECT *, ROUND(ST_DISTANCE_SPHERE(POINT(@sourceX, @sourceY), POINT(H.longitude, H.latitude))/1000, 2) as distance_km
+FROM Hospital H
+WHERE ST_DISTANCE_SPHERE(POINT(@sourceX, @sourceY), POINT(H.longitude, H.latitude)) < @radius
+ORDER BY distance_km;
 
 -- # What is the average amount of Thai Bhat I can get for $100 of SGD in January of 2022?
 SELECT ROUND(100*AVG(rate)) AS THB, AVG(rate) AS avg_rate

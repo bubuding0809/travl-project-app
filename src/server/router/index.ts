@@ -7,6 +7,7 @@ import { covidRouter } from "./covid";
 import { cityRouter } from "./city";
 import { forexRouter } from "./forex";
 import { travelRouter } from "./travel";
+import { hospitalRouter } from "./hospital";
 import { protectedExampleRouter } from "./protected-example-router";
 
 export const appRouter = createRouter()
@@ -16,7 +17,8 @@ export const appRouter = createRouter()
   .merge("city.", cityRouter)
   .merge("forex.", forexRouter)
   .merge("covid.", covidRouter)
-  .merge("travel.", travelRouter);
+  .merge("travel.", travelRouter)
+  .merge("hospital.", hospitalRouter);
 
 // export type definition of API
 export type AppRouter = typeof appRouter;

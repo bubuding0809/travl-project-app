@@ -1,36 +1,41 @@
 import { Dialog, Combobox, Transition } from "@headlessui/react";
-import { Dispatch, Fragment, SetStateAction, useEffect, useRef } from "react";
+import {
+  Dispatch,
+  Fragment,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { CityWithCountry } from "../server/router/city";
 import { trpc } from "../utils/trpc";
 import Spinner from "./Spinner";
+import { useDebounce } from "../utils/hooks/useDebounce";
 
 type SearchPaletteProps = {
   open: boolean;
-  query: string;
-  debouncedQuery: string;
   setOpen: Dispatch<SetStateAction<boolean>>;
-  setQuery: Dispatch<SetStateAction<string>>;
-  setDebouncedQuery: Dispatch<SetStateAction<string>>;
   setResult: Dispatch<SetStateAction<any>>;
 };
 const SearchPalette: React.FC<SearchPaletteProps> = ({
   open,
-  query,
-  debouncedQuery,
   setOpen,
-  setQuery,
-  setDebouncedQuery,
   setResult,
 }) => {
-  const focusRef = useRef<HTMLInputElement>(null);
+  const [query, setQuery, debouncedQuery] = useDebounce("", 250);
+
+  console.log(debouncedQuery);
   const {
     data: filteredCities,
     error,
     isFetching,
-  } = trpc.useQuery(["city.getCityByFullTextSearch", { query }], {
-    initialData: [],
-  });
+  } = trpc.useQuery(
+    ["city.getCityByFullTextSearch", { query: debouncedQuery }],
+    {
+      initialData: [],
+    }
+  );
 
   // Add key down listener to window
   useEffect(() => {
@@ -47,32 +52,17 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
     };
   }, [open]);
 
-  // Debounce query
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setQuery(debouncedQuery);
-    }, 300);
-
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [debouncedQuery]);
-
   return (
     <Transition.Root
       show={open}
       as={Fragment}
-      afterEnter={() => {
-        focusRef.current?.focus();
-      }}
       afterLeave={() => {
-        setDebouncedQuery("");
         setQuery("");
       }}
     >
       <Dialog
         onClose={setOpen}
-        className="fixed inset-0 overflow-y-auto p-6 pt-9 sm:pt-[20vh]"
+        className="fixed inset-0 z-50 overflow-y-auto p-6 pt-9 sm:pt-[20vh]"
       >
         {/* Overlay */}
         <Transition.Child
@@ -110,10 +100,8 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
               <div className="flex items-center px-3">
                 <MagnifyingGlassIcon className="h-6 w-6 flex-grow text-gray-500" />
                 <Combobox.Input
-                  ref={focusRef}
                   onChange={event => {
-                    const query = event.target.value.trim();
-                    setDebouncedQuery(query);
+                    setQuery(event.target.value.trim());
                   }}
                   className="w-full border-none bg-transparent p-3 text-neutral placeholder-gray-400 focus:ring-0"
                   placeholder="Search..."
@@ -124,7 +112,6 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
                     if (!debouncedQuery) {
                       setOpen(false);
                     }
-                    setDebouncedQuery("");
                     setQuery("");
                   }}
                 >
