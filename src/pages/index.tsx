@@ -1,15 +1,15 @@
 import { ReactElement, useRef, useState } from "react";
 import Layout from "../components/Layout";
 import { NextPageWithLayout } from "./_app";
-import SearchPalette from "../components/Home/SearchPalette";
+import SearchPalette from "../components/home/SearchPalette";
 import { CityWithCountry } from "../server/router/city";
 import { trpc } from "../utils/trpc";
 import { GetServerSideProps } from "next";
 import { prisma } from "../server/db/client";
-import CovidCard from "../components/Home/CovidCard";
-import AirTravelCard from "../components/Home/AirTravelCard";
-import SearchBar from "../components/Home/SearchBar";
-import HospitalCard from "../components/Home/HospitalCard";
+import CovidCard from "../components/home/CovidCard";
+import AirTravelCard from "../components/home/AirTravelCard";
+import SearchBar from "../components/home/SearchBar";
+import HospitalCard from "../components/home/HospitalCard";
 
 type IndexPageProps = {
   randomCity: CityWithCountry;
