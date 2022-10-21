@@ -73,7 +73,7 @@ LIMIT 1;
 -- # Find all hospitals and address of the hospital within 50Km of the city named Beijing.
 SET @sourceX = (SELECT longitude FROM City WHERE cid = '1156228865');
 SET @sourceY = (SELECT latitude FROM City WHERE cid = '1156228865');
-SET @radius = 10000;
+SET @radius = 50000;
 SELECT *, ROUND(ST_DISTANCE_SPHERE(POINT(@sourceX, @sourceY), POINT(H.longitude, H.latitude))/1000, 2) as distance_km
 FROM Hospital H
 WHERE ST_DISTANCE_SPHERE(POINT(@sourceX, @sourceY), POINT(H.longitude, H.latitude)) < @radius
@@ -108,11 +108,15 @@ WHERE F.originAirport = A1.icao AND F.destAirport = A2.icao
 ORDER BY F.departDateTime;
 
 -- # Get the origin airport name, destination airport name and price of the flight tickets that a user with username of “Amri99” has bought during Oct 2022.
-SELECT Aorigin.airportName, Adest.airportName, F.priceUSD, P.firstName, P.lastName
+SELECT Aorigin.airportName, Adest.airportName, F.priceUSD, P.firstName, P.lastName, F.departDateTime
 FROM Airport Aorigin, Airport Adest, Flight F, Passenger P, Ticket_buy TB, User U
 WHERE F.originAirport = Aorigin.icao AND F.destAirport = Adest.icao 
 	  AND TB.uid = U.id AND TB.fid = F.fid AND TB.pid = P.pid 
-	  AND U.name = 'Amri99' AND DATE_FORMAT(TB.createdAt, '%Y-%m') = '2022-10';
+	  AND U.id = 'cl92lvec40000obt1t62zu8ca'
+ORDER BY F.departDateTime;
+
+
+SELECT DATE_FORMAT(DATE('2022-11-01'), '%Y %m');
 
 SELECT *
 FROM (SELECT * FROM Airport WHERE cid = '1156228865'
@@ -125,3 +129,26 @@ FROM (SELECT * FROM Airport WHERE cid = '1156228865'
 LIMIT 3) as NearByAirports
 WHERE iata IS NOT NULL
 LIMIT 10;
+
+SELECT Airport.icao, Airport.iata, Airport.airportName, City.cityName, Country.countryName
+FROM Airport, City, Country
+WHERE Airport.cid = City.cid AND City.cityName LIKE '%beijing%' AND City.alpha3 = Country.alpha3 AND Airport.iata IS NOT NULL
+
+SELECT F.fid, F.departDateTime, F.arriveDateTime, A1.iata as originIata, A2.iata as destIata, F.priceUSD
+FROM Flight F, Airport A1, Airport A2
+WHERE F.originAirport = A1.icao AND F.destAirport = A2.icao
+      AND
+      F.originAirport = 'WSSS'
+      AND
+      F.destAirport = 'RJTT'
+      AND DATE(F.departDateTime) = '2022-10-22'
+ORDER BY F.departDateTime
+LIMIT 1;
+
+SELECT Passenger.lastName, Country.countryName
+FROM Passenger, Nationality, Country
+WHERE Passenger.pid = Nationality.pid AND Nationality.alpha3 = Country.alpha3
+
+SELECT * FROM City where cityName LIKE '%beijing%'
+
+SELECT COUNT(*) FROM Ticket_buy;

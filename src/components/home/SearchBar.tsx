@@ -1,12 +1,13 @@
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useRef } from "react";
 
 type SearchBarProps = {
-  innerRef: React.RefObject<HTMLInputElement>;
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
 };
-const SearchBar: React.FC<SearchBarProps> = ({ innerRef, setOpen, open }) => {
+const SearchBar: React.FC<SearchBarProps> = ({ setOpen, open }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+
   return (
     <div className="sticky top-0 z-10 flex w-full items-center gap-4 rounded-xl border border-white/30 bg-[#f7f7f7]/50 p-3 shadow-xl backdrop-blur-md sm:px-4">
       <div className="hidden flex-col sm:flex">
@@ -29,13 +30,13 @@ const SearchBar: React.FC<SearchBarProps> = ({ innerRef, setOpen, open }) => {
       >
         <MagnifyingGlassIcon className="h-auto w-6 text-gray-500" />
         <input
-          ref={innerRef}
+          ref={inputRef}
           type="text"
           className="w-full border-none bg-transparent p-3 text-neutral placeholder-gray-400 focus:ring-0"
           placeholder="Search..."
           onFocus={() => {
             setOpen(true);
-            innerRef.current?.blur();
+            inputRef.current?.blur();
           }}
         />
         <div className="space-x-1">

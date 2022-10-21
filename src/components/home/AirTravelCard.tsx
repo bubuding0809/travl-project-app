@@ -9,7 +9,10 @@ type AirTravelCardProps = {
 
 const today = new Date();
 const AirTravelCard: React.FC<AirTravelCardProps> = ({ city }) => {
-  const airportQuery = trpc.useQuery(["travel.getAirportsByCity", { city }]);
+  const airportQuery = trpc.useQuery([
+    "travel.getAirportsByCid",
+    { cid: city },
+  ]);
   const [selectedAirport, setSelectedAirport] = useState(
     airportQuery.data && airportQuery.data.length > 0
       ? airportQuery.data[0]
@@ -31,7 +34,7 @@ const AirTravelCard: React.FC<AirTravelCardProps> = ({ city }) => {
   }, [airportQuery.data]);
 
   const flightQuery = trpc.useQuery([
-    "travel.getFlightsByAirport",
+    "travel.getFlightsByAirportBeyondDate",
     {
       originAirportIcao: "WSSS",
       destinationAirportIcao: selectedAirport!.icao,

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {
   Circle,
   GoogleMap,
@@ -36,21 +36,26 @@ const GoogleMapWindow: React.FC<GoogleMapWindowProps> = ({
     null
   );
   const [isOpen, setIsOpen] = React.useState(false);
+  const [map, setMap] = React.useState<google.maps.Map | null>(null);
 
-  const [map, setMap] = React.useState(null);
-
-  const onLoad = React.useCallback((map: any) => {
-    const bounds = new window.google.maps.LatLngBounds(center);
-    map.fitBounds(bounds);
+  useEffect(() => {
+    if (map) {
+      map.setZoom(Math.round(radius / -30) + 12);
+    }
+  }, [radius]);
+  const onLoad = React.useCallback((map: google.maps.Map) => {
     setMap(map);
   }, []);
 
-  const onUnmount = React.useCallback((map: any) => {
+  const onUnmount = React.useCallback((map: google.maps.Map) => {
     setMap(null);
   }, []);
 
   return isLoaded ? (
     <GoogleMap
+      onZoomChanged={() => {
+        if (map) console.log(map.getZoom());
+      }}
       mapContainerStyle={containerStyle}
       center={center}
       zoom={12}
@@ -97,11 +102,19 @@ const GoogleMapWindow: React.FC<GoogleMapWindowProps> = ({
             lng: selected.longitude!,
           }}
         >
-          <div>
-            <h2 className="font-bold">{selected.hospitalName}</h2>
-            <p>{selected.address}</p>
-            <p>Phone No: {selected.phoneNo}</p>
-            <p>{selected.distance} km away from center</p>
+          <div className="flex flex-col gap-2 p-1">
+            <div>
+              <h2 className="text-lg font-bold">{selected.hospitalName}</h2>
+              <p className=" font-normal">{selected.address}</p>
+              <p className="mt-1">
+                <a className="link link-hover" href={`tel:${selected.phoneNo}`}>
+                  {selected.phoneNo}
+                </a>
+              </p>
+              <p className="mt-1 text-xs">
+                {selected.distance} km away from center
+              </p>
+            </div>
             <a
               className="link link-primary"
               target={"_blank"}
@@ -124,7 +137,8 @@ const GoogleMapWindow: React.FC<GoogleMapWindowProps> = ({
           animation={4}
           onClick={() => {
             setSelected(hospital);
-            setIsOpen(true);
+            setIsOpen(false);
+            setTimeout(() => setIsOpen(true), 1);
           }}
         />
       ))}

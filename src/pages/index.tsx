@@ -20,7 +20,7 @@ const today = new Date().toISOString().split("T")[0];
 const IndexPage: NextPageWithLayout<IndexPageProps> = ({ randomCity }) => {
   const [result, setResult] = useState<CityWithCountry | null>(randomCity);
   const [open, setOpen] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [baseValue, setBaseValue] = useState(1);
 
   const forexQuery = trpc.useQuery([
     "forex.getForexByDate",
@@ -35,7 +35,7 @@ const IndexPage: NextPageWithLayout<IndexPageProps> = ({ randomCity }) => {
     <main className="flex flex-col gap-2">
       <SearchPalette setResult={setResult} open={open} setOpen={setOpen} />
       {/* Search bar */}
-      <SearchBar innerRef={inputRef} open={open} setOpen={setOpen} />
+      <SearchBar open={open} setOpen={setOpen} />
       {/* City information */}
       {result && (
         <div className="grid h-full grid-cols-1 gap-4 p-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -108,13 +108,19 @@ const IndexPage: NextPageWithLayout<IndexPageProps> = ({ randomCity }) => {
               <div className="flex w-full items-center justify-between">
                 <div className="w-2/5 rounded-md bg-white p-2 text-center font-extrabold shadow-md">
                   <p className="font-normal">SGD</p>
-                  <p>1</p>
+                  <input
+                    type="number"
+                    className="input w-full text-center"
+                    value={baseValue}
+                    onChange={e => setBaseValue(Number(e.target.value))}
+                    min={0}
+                  />
                 </div>
                 =
                 <div className="w-2/5 rounded-md bg-white p-2 text-center font-extrabold shadow-md">
                   <p className="font-normal">{result.isoCode}</p>
                   {forexQuery.data ? (
-                    <p>{forexQuery.data?.rate.toFixed(2)}</p>
+                    <p>{(forexQuery.data?.rate * baseValue).toFixed(2)}</p>
                   ) : (
                     <p>{result.isoCode === "SGD" ? 1 : "No data"}</p>
                   )}

@@ -1,35 +1,46 @@
 import { PrismaClient, Prisma } from "@prisma/client";
+import { faker } from "@faker-js/faker";
 const prisma = new PrismaClient();
 
-const query = Prisma.sql`SELECT H.hospitalName, C1.cityName, H.address, C2.countryName
-                          FROM Hospital H, City C1, Country C2
-                          WHERE H.cid = C1.cid AND C1.alpha3=C2.alpha3 AND C1.cityName LIKE 'Beijing'`;
-
+const generatePassenger = () => {
+  return {
+    firstName: faker.name.firstName(),
+    lastName: faker.name.lastName(),
+    passportNo: faker.random.alphaNumeric(9).toUpperCase(),
+    age: parseInt(faker.random.numeric(2, { allowLeadingZeros: false })),
+  };
+};
 async function main() {
-  const beijingHospitals = await prisma.hospital.findMany({
+  const users = await prisma.user.findMany();
+  const passengers = await prisma.passenger.findMany();
+  const flights = await prisma.flight.findMany({
     where: {
-      City: {
-        cityName: {
-          contains: "Beijing",
-        },
-      },
-    },
-    include: {
-      City: {
-        select: {
-          Country: {
-            select: {
-              countryName: true,
-              alpha3: true,
-            },
-          },
-        },
+      departDateTime: {
+        gte: new Date("2023-01-01"),
+        lte: new Date("2023-01-25"),
       },
     },
   });
 
-  beijingHospitals.forEach(hospital => {
-    console.log(hospital);
+  passengers.forEach(async passenger => {
+    const selectedUser = users[Math.floor(Math.random() * users.length)];
+    const selectedFlight = flights[Math.floor(Math.random() * flights.length)];
+    const flieswith = await prisma.flies_with.create({
+      data: {
+        fid: selectedFlight!.fid,
+        pid: passenger.pid,
+      },
+    });
+
+    const ticket = await prisma.ticket_buy.create({
+      data: {
+        fid: selectedFlight!.fid,
+        pid: passenger.pid,
+        uid: selectedUser!.id,
+      },
+    });
+
+    console.log(flieswith, ticket);
   });
 }
 

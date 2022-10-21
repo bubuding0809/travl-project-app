@@ -1,17 +1,27 @@
 import { Dialog, Combobox, Transition } from "@headlessui/react";
 import { Dispatch, Fragment, SetStateAction, useEffect } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { CityWithCountry } from "../server/router/city";
-import { trpc } from "../utils/trpc";
-import Spinner from "./Spinner";
-import { useDebounce } from "../utils/hooks/useDebounce";
+import { trpc } from "../../utils/trpc";
+import Spinner from "../Spinner";
+import { useDebounce } from "../../utils/hooks/useDebounce";
 
-type SearchPaletteProps = {
-  open: boolean;
-  setOpen: Dispatch<SetStateAction<boolean>>;
-  setResult: Dispatch<SetStateAction<any>>;
+type AirportSearchPaletteProps = {
+  open: {
+    selected: "from" | "to" | null;
+    open: boolean;
+  };
+  setOpen: Dispatch<
+    SetStateAction<{
+      selected: null | "from" | "to";
+      open: boolean;
+    }>
+  >;
+  setResult: {
+    setFromAirport: Dispatch<SetStateAction<any>>;
+    setToAirport: Dispatch<SetStateAction<any>>;
+  };
 };
-const SearchPalette: React.FC<SearchPaletteProps> = ({
+const AirportSearchPalette: React.FC<AirportSearchPaletteProps> = ({
   open,
   setOpen,
   setResult,
@@ -19,41 +29,29 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
   const [query, setQuery, debouncedQuery] = useDebounce("", 250);
 
   const {
-    data: filteredCities,
-    error,
+    data: filteredAirports,
     isFetching,
-  } = trpc.useQuery(
-    ["city.getCityByFullTextSearch", { query: debouncedQuery }],
-    {
-      initialData: [],
-    }
-  );
-
-  // Add key down listener to window
-  useEffect(() => {
-    // get window to listen to keydown events
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "k" && (event.ctrlKey || event.metaKey)) {
-        setOpen(prevState => !prevState);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [open]);
+    error,
+  } = trpc.useQuery([
+    "travel.getAirportsByCityName",
+    { cityName: debouncedQuery },
+  ]);
 
   return (
     <Transition.Root
-      show={open}
+      show={open.open}
       as={Fragment}
       afterLeave={() => {
         setQuery("");
       }}
     >
       <Dialog
-        onClose={setOpen}
+        onClose={() =>
+          setOpen(prev => ({
+            ...prev,
+            open: false,
+          }))
+        }
         className="fixed inset-0 z-50 overflow-y-auto p-6 pt-9 sm:pt-[20vh]"
       >
         {/* Overlay */}
@@ -81,9 +79,24 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
         >
           <Dialog.Panel className="relative mx-auto max-w-xl rounded-xl border bg-white shadow-2xl ring ring-indigo-700/30 ring-offset-2">
             <Combobox
-              onChange={(city: CityWithCountry) => {
-                setOpen(false);
-                setResult(city);
+              onChange={(airport: any) => {
+                setOpen(prev => ({
+                  ...prev,
+                  open: false,
+                }));
+                if (open.selected === "from") {
+                  setResult.setFromAirport({
+                    cityName: airport.City.cityName,
+                    icao: airport.icao,
+                    iata: airport.iata,
+                  });
+                } else {
+                  setResult.setToAirport({
+                    cityName: airport.City.cityName,
+                    icao: airport.icao,
+                    iata: airport.iata,
+                  });
+                }
               }}
               as="div"
               className="divide-y"
@@ -102,7 +115,10 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
                   className="rounded border bg-gray-100 p-1 px-1.5 font-bold shadow-md"
                   onClick={() => {
                     if (!debouncedQuery) {
-                      setOpen(false);
+                      setOpen(prev => ({
+                        ...prev,
+                        open: false,
+                      }));
                     }
                     setQuery("");
                   }}
@@ -113,29 +129,29 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
 
               {/* Filtered search options */}
               <div>
-                {filteredCities!.length > 0 && (
+                {filteredAirports && filteredAirports.length > 0 && (
                   <Combobox.Options
                     className="max-h-96 overflow-y-auto p-2"
                     static
                   >
-                    {filteredCities!.map(city => (
-                      <Combobox.Option key={city.cid} value={city}>
+                    {filteredAirports!.map(airport => (
+                      <Combobox.Option key={airport.icao} value={airport}>
                         {({ active }) => (
                           <div
                             className={`flex items-center gap-2 rounded-md p-2 ${
                               active ? "bg-primary text-white" : "bg-white"
                             }`}
                           >
-                            <p className="font-bold">{city.cityName}</p>
+                            <p className="font-bold">{airport.City.cityName}</p>
                             <p
                               className={`${
                                 active ? "text-gray-400" : "text-gray-500"
                               }`}
                             >
-                              in {city.countryName}
+                              ({airport.iata})
                             </p>
                             <span className="ml-auto mr-2 text-xl">
-                              {city.countryFlagEmoji}
+                              {airport.City.Country.countryName}
                             </span>
                           </div>
                         )}
@@ -143,14 +159,17 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
                     ))}
                   </Combobox.Options>
                 )}
-                {query && filteredCities!.length === 0 && !isFetching && (
-                  <div>
-                    <p className="p-2 px-4 text-start text-gray-500">
-                      No results found
-                    </p>
-                  </div>
-                )}
-                {query && filteredCities!.length === 0 && isFetching && (
+                {query &&
+                  filteredAirports &&
+                  filteredAirports.length === 0 &&
+                  !isFetching && (
+                    <div>
+                      <p className="p-2 px-4 text-start text-gray-500">
+                        No results found
+                      </p>
+                    </div>
+                  )}
+                {query && isFetching && (
                   <div className="flex items-center">
                     <p className="p-2 px-4 text-start text-gray-500">
                       Loading results...
@@ -161,15 +180,15 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
                 {!query && (
                   <div>
                     <p className="p-2 px-4 text-start text-gray-500">
-                      Start by typing a city name
+                      Search for airports by city name
                       <span className="block">
                         e.g.
                         <span className="font-bold">
                           {" "}
-                          &quot;New York&quot;{" "}
+                          &quot;Singapore&quot;{" "}
                         </span>
                         or
-                        <span className="font-bold"> &quot;London&quot;</span>
+                        <span className="font-bold"> &quot;Beijing&quot;</span>
                       </span>
                     </p>
                   </div>
@@ -190,4 +209,4 @@ const SearchPalette: React.FC<SearchPaletteProps> = ({
   );
 };
 
-export default SearchPalette;
+export default AirportSearchPalette;
