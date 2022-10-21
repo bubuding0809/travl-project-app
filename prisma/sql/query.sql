@@ -89,7 +89,10 @@ SELECT MONTHNAME(C.entryDate) AS Month, ROUND(AVG(C.newCaseNo)) AS Average_Cases
 FROM Covid C, Country Cn 
 WHERE Cn.countryName = 'Singapore' AND C.alpha3=Cn.alpha3 AND YEAR(C.entryDate) = 2022
 GROUP BY Month 
-ORDER BY Average_Cases DESC;
+ORDER BY Average_Cases DESC
+LIMIT 1;
+
+SELECT newCaseNo FROM Covid C WHERE MONTH(C.entryDate) = 2 AND C.alpha3 = 'SGP' ORDER BY newCaseNo DESC;
 
 -- # What is the earliest flight that I can take from Changi Airport to a city called Tokyo on the 2nd Oct 2022?
 SELECT A2.airportName as Destination_Airport, F.departDateTime, F.arriveDateTime

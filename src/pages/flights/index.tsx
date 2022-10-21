@@ -140,7 +140,9 @@ const FlightsPage: NextPageWithLayout = () => {
                     ? `${flightFromData.from.cityName} (${flightFromData.from.iata})`
                     : ""
                 }
-                onChange={() => {}}
+                onChange={() => {
+                  return;
+                }}
               />
             </div>
             <div className="form-control col-span-2 md:col-span-1">
@@ -157,7 +159,9 @@ const FlightsPage: NextPageWithLayout = () => {
                     ? `${flightFromData.to.cityName} (${flightFromData.to.iata})`
                     : ""
                 }
-                onChange={() => {}}
+                onChange={() => {
+                  return;
+                }}
               />
             </div>
           </div>
@@ -230,14 +234,14 @@ const FlightsPage: NextPageWithLayout = () => {
           >
             <h3 className="text-xl font-bold">Departure</h3>
             {departureFlightQuery.data?.map(flight => (
-              <FlightTicketCard data={flight} />
+              <FlightTicketCard data={flight} key={flight.fid} />
             ))}
           </div>
           {flightFromData.type === "roundtrip" && (
             <div className="col-span-2 flex flex-col gap-2 lg:col-span-1">
               <h3 className="text-xl font-bold">Return</h3>
               {returnFlightQuery.data?.map(flight => (
-                <FlightTicketCard data={flight} />
+                <FlightTicketCard data={flight} key={flight.fid} />
               ))}
             </div>
           )}
