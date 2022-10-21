@@ -72,7 +72,7 @@ const FlightsPage: NextPageWithLayout = () => {
   ]);
 
   return (
-    <main className="flex flex-col justify-center gap-2 ">
+    <main className="flex max-h-screen flex-col justify-start gap-2 overflow-y-auto p-4 sm:p-8">
       <AirportSearchPalette
         open={open}
         setOpen={setOpen}

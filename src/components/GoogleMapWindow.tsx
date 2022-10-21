@@ -53,9 +53,6 @@ const GoogleMapWindow: React.FC<GoogleMapWindowProps> = ({
 
   return isLoaded ? (
     <GoogleMap
-      onZoomChanged={() => {
-        if (map) console.log(map.getZoom());
-      }}
       mapContainerStyle={containerStyle}
       center={center}
       zoom={12}

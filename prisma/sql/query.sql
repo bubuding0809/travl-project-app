@@ -110,12 +110,12 @@ WHERE F.originAirport = A1.icao AND F.destAirport = A2.icao
 						DATE(F.departDateTime) = '2022-10-02'
 ORDER BY F.departDateTime;
 
--- # Get the origin airport name, destination airport name and price of the flight tickets that a user with username of “Amri99” has bought during Oct 2022.
-SELECT Aorigin.airportName, Adest.airportName, F.priceUSD, P.firstName, P.lastName, F.departDateTime
-FROM Airport Aorigin, Airport Adest, Flight F, Passenger P, Ticket_buy TB, User U
-WHERE F.originAirport = Aorigin.icao AND F.destAirport = Adest.icao 
+-- # Get the flight tickets information for flights in 2022 December that the user AMRI with an id of "cl92lvec40000obt1t62zu8ca" has bought.
+SELECT Ao.iata, Ao.airportName, Ad.iata, Ad.airportName, F.priceUSD, P.firstName, P.lastName, P.age, P.passportNo, F.departDateTime, F.arriveDateTime
+FROM Airport Ao, Airport Ad, Flight F, Passenger P, Ticket_buy TB, User U
+WHERE F.originAirport = Ao.icao AND F.destAirport = Ad.icao
 	  AND TB.uid = U.id AND TB.fid = F.fid AND TB.pid = P.pid 
-	  AND U.id = 'cl92lvec40000obt1t62zu8ca'
+	  AND U.id = 'cl92lvec40000obt1t62zu8ca' AND DATE_FORMAT(F.departDateTime, '%Y-%m') = '2022-12'
 ORDER BY F.departDateTime;
 
 

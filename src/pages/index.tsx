@@ -1,15 +1,15 @@
 import { ReactElement, useRef, useState } from "react";
 import Layout from "../components/Layout";
 import { NextPageWithLayout } from "./_app";
-import SearchPalette from "../components/SearchPalette";
+import SearchPalette from "../components/Home/SearchPalette";
 import { CityWithCountry } from "../server/router/city";
 import { trpc } from "../utils/trpc";
 import { GetServerSideProps } from "next";
 import { prisma } from "../server/db/client";
-import CovidCard from "../components/home/CovidCard";
-import AirTravelCard from "../components/home/AirTravelCard";
-import SearchBar from "../components/home/SearchBar";
-import HospitalCard from "../components/home/HospitalCard";
+import CovidCard from "../components/Home/CovidCard";
+import AirTravelCard from "../components/Home/AirTravelCard";
+import SearchBar from "../components/Home/SearchBar";
+import HospitalCard from "../components/Home/HospitalCard";
 
 type IndexPageProps = {
   randomCity: CityWithCountry;
@@ -32,7 +32,7 @@ const IndexPage: NextPageWithLayout<IndexPageProps> = ({ randomCity }) => {
   ]);
 
   return (
-    <main className="flex flex-col gap-2">
+    <main className="flex max-h-screen flex-col gap-2 overflow-y-auto p-4 sm:p-8">
       <SearchPalette setResult={setResult} open={open} setOpen={setOpen} />
       {/* Search bar */}
       <SearchBar open={open} setOpen={setOpen} />
@@ -149,14 +149,6 @@ const IndexPage: NextPageWithLayout<IndexPageProps> = ({ randomCity }) => {
           />
         </div>
       )}
-
-      {/* <pre>
-        <code>{JSON.stringify(result, null, 2)}</code>,{" "}
-        <code>{JSON.stringify(forexQuery.data, null, 2)}</code>
-      </pre> */}
-
-      {/* Bottom spacer */}
-      <div className="p-8"></div>
     </main>
   );
 };

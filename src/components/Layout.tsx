@@ -12,22 +12,25 @@ type Props = {
   title?: string;
 };
 
-const sideBarItems = {
+const sideBarItemsPublic = {
   home: {
     name: "Home",
     icon: "/home.gif",
     href: "/",
-  },
-  explore: {
-    name: "Explore",
-    icon: "/explore.gif",
-    href: "/explore",
   },
   flights: {
     name: "Flights",
     icon: "/flights.gif",
     href: "/flights",
   },
+  explore: {
+    name: "Explore",
+    icon: "/explore.gif",
+    href: "/explore",
+  },
+};
+
+const sideBarItemsAuthed = {
   Tickets: {
     name: "Tickets",
     icon: "/tickets.gif",
@@ -40,6 +43,7 @@ const active =
 
 const Layout = ({ children, title }: Props) => {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -59,7 +63,6 @@ const Layout = ({ children, title }: Props) => {
     };
   });
 
-  const { data: session, status } = useSession();
   return (
     <>
       <Head>
@@ -81,22 +84,41 @@ const Layout = ({ children, title }: Props) => {
           {/* Sidebar items */}
           <div className="my-2 flex h-full flex-col justify-between p-2">
             <ul>
-              {Object.entries(sideBarItems).map(([key, item]) => (
-                <Link href={item.href} key={key}>
-                  <li
-                    className={`mb-2 flex w-full cursor-pointer items-center justify-start py-3 px-2 text-gray-300 transition-transform duration-300 hover:text-gray-500 ${
-                      router.asPath === item.href ? active : ""
-                    }`}
-                  >
-                    <img
-                      src={item.icon}
-                      className="h-auto w-6 rounded-md"
-                      alt={`${item.name} icon`}
-                    />
-                    <span className="ml-2 text-white">{item.name}</span>
-                  </li>
-                </Link>
-              ))}
+              {Object.entries(sideBarItemsPublic).map(([key, item]) => {
+                return (
+                  <Link href={item.href} key={key}>
+                    <li
+                      className={`mb-2 flex w-full cursor-pointer items-center justify-start py-3 px-2 text-gray-300 transition-transform duration-300 hover:text-gray-500 ${
+                        router.asPath === item.href ? active : ""
+                      }`}
+                    >
+                      <img
+                        src={item.icon}
+                        className="h-auto w-6 rounded-md"
+                        alt={`${item.name} icon`}
+                      />
+                      <span className="ml-2 text-white">{item.name}</span>
+                    </li>
+                  </Link>
+                );
+              })}
+              {session &&
+                Object.entries(sideBarItemsAuthed).map(([key, item]) => (
+                  <Link href={item.href} key={key}>
+                    <li
+                      className={`mb-2 flex w-full cursor-pointer items-center justify-start py-3 px-2 text-gray-300 transition-transform duration-300 hover:text-gray-500 ${
+                        router.asPath === item.href ? active : ""
+                      }`}
+                    >
+                      <img
+                        src={item.icon}
+                        className="h-auto w-6 rounded-md"
+                        alt={`${item.name} icon`}
+                      />
+                      <span className="ml-2 text-white">{item.name}</span>
+                    </li>
+                  </Link>
+                ))}
             </ul>
             {status === "loading" ? (
               <Spinner />
@@ -216,13 +238,13 @@ const Layout = ({ children, title }: Props) => {
         </div>
         {/* Sidebar ends */}
 
-        <div className="h-screen w-full overflow-y-auto p-4 sm:p-8">
+        <div className="h-screen w-full">
           {loading ? (
             <div className="flex h-full w-full items-center justify-center">
               <p className="text-3xl font-bold">Loading...</p>
             </div>
           ) : (
-            <div className="h-full w-full">{children}</div>
+            <>{children}</>
           )}
         </div>
       </div>

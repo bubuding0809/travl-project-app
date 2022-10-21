@@ -3,7 +3,11 @@ import Layout from "../components/Layout";
 import { NextPageWithLayout } from "./_app";
 
 const ExplorePage: NextPageWithLayout = () => {
-  return <main className="flex flex-col gap-2"></main>;
+  return (
+    <main className="flex h-full flex-col items-center justify-center gap-2">
+      <h1 className="text-4xl font-bold">Work in progress...</h1>
+    </main>
+  );
 };
 
 export default ExplorePage;

@@ -209,16 +209,24 @@ model Post {
 }
 
 model Ticket_buy {
-  createdAt DateTime? @default(now()) @db.DateTime(0)
-  updatedAt DateTime? @default(now()) @db.DateTime(0)
+  createdAt DateTime?         @default(now()) @db.DateTime(0)
+  updatedAt DateTime?         @default(now()) @db.DateTime(0)
   uid       String
   fid       Int
-  pid       String    @db.VarChar(40)
-  User      User      @relation(fields: [uid], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Ticket_buy_ibfk_1")
-  Flight    Flight    @relation(fields: [fid], references: [fid], onDelete: NoAction, onUpdate: NoAction, map: "Ticket_buy_ibfk_2")
-  Passenger Passenger @relation(fields: [pid], references: [pid], onDelete: NoAction, onUpdate: NoAction, map: "Ticket_buy_ibfk_3")
+  pid       String            @db.VarChar(40)
+  seatNo    String?           @db.VarChar(5)
+  User      User              @relation(fields: [uid], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Ticket_buy_ibfk_1")
+  class     Ticket_buy_class?
+  Flight    Flight            @relation(fields: [fid], references: [fid], onDelete: NoAction, onUpdate: NoAction, map: "Ticket_buy_ibfk_2")
+  Passenger Passenger         @relation(fields: [pid], references: [pid], onDelete: NoAction, onUpdate: NoAction, map: "Ticket_buy_ibfk_3")
 
   @@id([uid, fid, pid])
   @@index([fid], map: "fid")
   @@index([pid], map: "pid")
+}
+
+enum Ticket_buy_class {
+  Economy
+  Business
+  First
 }

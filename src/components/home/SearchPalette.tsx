@@ -1,10 +1,10 @@
 import { Dialog, Combobox, Transition } from "@headlessui/react";
 import { Dispatch, Fragment, SetStateAction, useEffect } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { CityWithCountry } from "../server/router/city";
-import { trpc } from "../utils/trpc";
-import Spinner from "./Spinner";
-import { useDebounce } from "../utils/hooks/useDebounce";
+import { CityWithCountry } from "../../server/router/city";
+import { trpc } from "../../utils/trpc";
+import Spinner from "../Spinner";
+import { useDebounce } from "../../utils/hooks/useDebounce";
 
 type SearchPaletteProps = {
   open: boolean;

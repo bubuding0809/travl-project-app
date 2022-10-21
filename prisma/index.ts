@@ -10,37 +10,35 @@ const generatePassenger = () => {
     age: parseInt(faker.random.numeric(2, { allowLeadingZeros: false })),
   };
 };
+
+const generateRandomClass = () =>
+  ["Economy", "Business", "First"][Math.floor(Math.random() * 3)] as
+    | "Economy"
+    | "Business"
+    | "First";
+const generateRandomSeat = () => {
+  const row = Math.floor(Math.random() * 100);
+  const col = "ABCDEFGHJ"[Math.floor(Math.random() * 9)];
+  return row + col!;
+};
 async function main() {
-  const users = await prisma.user.findMany();
-  const passengers = await prisma.passenger.findMany();
-  const flights = await prisma.flight.findMany({
-    where: {
-      departDateTime: {
-        gte: new Date("2023-01-01"),
-        lte: new Date("2023-01-25"),
-      },
-    },
-  });
-
-  passengers.forEach(async passenger => {
-    const selectedUser = users[Math.floor(Math.random() * users.length)];
-    const selectedFlight = flights[Math.floor(Math.random() * flights.length)];
-    const flieswith = await prisma.flies_with.create({
-      data: {
-        fid: selectedFlight!.fid,
-        pid: passenger.pid,
-      },
-    });
-
-    const ticket = await prisma.ticket_buy.create({
-      data: {
-        fid: selectedFlight!.fid,
-        pid: passenger.pid,
-        uid: selectedUser!.id,
-      },
-    });
-
-    console.log(flieswith, ticket);
+  const tickets = await prisma.ticket_buy.findMany();
+  tickets.forEach(async ticket => {
+    console.log(
+      await prisma.ticket_buy.update({
+        where: {
+          uid_fid_pid: {
+            uid: ticket.uid,
+            pid: ticket.pid,
+            fid: ticket.fid,
+          },
+        },
+        data: {
+          seatNo: generateRandomSeat(),
+          class: generateRandomClass(),
+        },
+      })
+    );
   });
 }
 
