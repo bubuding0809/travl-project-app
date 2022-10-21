@@ -48,7 +48,7 @@ const TicketsPage: NextPageWithLayout = () => {
         <span className="bg-gradient-to-br from-emerald-500 to-indigo-600 bg-clip-text text-transparent">
           {session?.user?.name}
         </span>
-        's tickets
+        &apos;s tickets
       </h1>
       <div
         className={`sticky top-0 z-10 mt-4 flex flex-col gap-2 transition-all duration-300 ${
