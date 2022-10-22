@@ -1,10 +1,9 @@
-import { ReactElement, useRef, useState } from "react";
-import { ArrowRightIcon } from "@heroicons/react/24/outline";
+import { ReactElement, useState } from "react";
 import Layout from "../../components/Layout";
 import { NextPageWithLayout } from "../_app";
-import AirportSearchPalette from "../../components/flights/AirportSearchPalette";
+import AirportSearchPalette from "../../components/FlightPage/AirportSearchPalette";
 import { trpc } from "../../utils/trpc";
-import FlightTicketCard from "../../components/flights/FlightTicketCard";
+import FlightTicketCard from "../../components/FlightPage/FlightTicketCard";
 
 const today = new Date().toISOString().split("T")[0];
 
