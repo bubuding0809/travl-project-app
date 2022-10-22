@@ -119,6 +119,8 @@ CREATE TABLE Ticket_buy (
     uid VARCHAR(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
     fid INT,
     pid VARCHAR(40),
+    seatNo varchar(5) NULL,
+    class enum ('Economy', 'Business', 'First') NULL,
     PRIMARY KEY (uid, fid, pid),
     FOREIGN KEY (uid) REFERENCES User(id) ON DELETE NO ACTION,
     FOREIGN KEY (fid) REFERENCES Flight(fid),
