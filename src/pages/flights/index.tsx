@@ -2,9 +2,9 @@ import { ReactElement, useRef, useState } from "react";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Layout from "../../components/Layout";
 import { NextPageWithLayout } from "../_app";
-import AirportSearchPalette from "../../components/Flights/AirportSearchPalette";
+import AirportSearchPalette from "../../components/flights/AirportSearchPalette";
 import { trpc } from "../../utils/trpc";
-import FlightTicketCard from "../../components/Flights/FlightTicketCard";
+import FlightTicketCard from "../../components/flights/FlightTicketCard";
 
 const today = new Date().toISOString().split("T")[0];
 
