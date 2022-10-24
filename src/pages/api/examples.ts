@@ -8,7 +8,10 @@ const examples = async (req: NextApiRequest, res: NextApiResponse) => {
   } else {
     const { q } = req.query;
     console.log(q);
-    res.status(200).json(q);
+    res.status(200).json({
+      message: "Success",
+      data: "Your query is " + q,
+    });
   }
 };
 
