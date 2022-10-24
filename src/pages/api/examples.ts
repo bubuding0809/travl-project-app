@@ -1,10 +1,14 @@
 // src/pages/api/examples.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { prisma } from "../../server/db/client";
 
 const examples = async (req: NextApiRequest, res: NextApiResponse) => {
-  const examples = "hello world";
-  res.status(200).json(examples);
+  if (req.method === "POST") {
+    console.log(req.body);
+    res.status(200).json({ message: "Success" });
+  } else {
+    console.log("GET request");
+    res.status(200).json("Hello World");
+  }
 };
 
 export default examples;
